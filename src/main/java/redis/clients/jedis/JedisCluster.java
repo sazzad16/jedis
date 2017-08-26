@@ -224,6 +224,17 @@ public class JedisCluster extends BinaryJedisCluster implements JedisCommands,
     }.run(key);
   }
 
+  @Override
+  public Long pttl(final String key) {
+    return new JedisClusterCommand<Long>(connectionHandler, maxAttempts) {
+      @Override
+      public Long execute(Jedis connection) {
+        return connection.pttl(key);
+      }
+    }.run(key);
+  }
+
+  @Override
   public Long touch(final String key) {
     return new JedisClusterCommand<Long>(connectionHandler, maxAttempts) {
       @Override
@@ -240,16 +251,6 @@ public class JedisCluster extends BinaryJedisCluster implements JedisCommands,
         return connection.touch(keys);
       }
     }.run(keys.length, keys);
-  }
-
-  @Override
-  public Long pttl(final String key) {
-    return new JedisClusterCommand<Long>(connectionHandler, maxAttempts) {
-      @Override
-      public Long execute(Jedis connection) {
-        return connection.pttl(key);
-      }
-    }.run(key);
   }
 
   @Override

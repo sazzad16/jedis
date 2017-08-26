@@ -343,6 +343,13 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     return client.getIntegerReply();
   }
 
+  @Override
+  public Long pttl(final String key) {
+    checkIsInMultiOrPipeline();
+    client.pttl(key);
+    return client.getIntegerReply();
+  }
+
   /**
    * Alters the last access time of a key(s). A key is ignored if it does not exist.
    * Time complexity: O(N) where N is the number of keys that will be touched.
@@ -2999,12 +3006,6 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
   public Long pexpireAt(final String key, final long millisecondsTimestamp) {
     checkIsInMultiOrPipeline();
     client.pexpireAt(key, millisecondsTimestamp);
-    return client.getIntegerReply();
-  }
-
-  public Long pttl(final String key) {
-    checkIsInMultiOrPipeline();
-    client.pttl(key);
     return client.getIntegerReply();
   }
 
