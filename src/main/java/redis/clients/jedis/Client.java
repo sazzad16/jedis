@@ -102,6 +102,10 @@ public class Client extends BinaryClient implements Commands {
     ttl(SafeEncoder.encode(key));
   }
 
+  public void pttl(final String key) {
+    pttl(SafeEncoder.encode(key));
+  }
+
   public void move(final String key, final int dbIndex) {
     move(SafeEncoder.encode(key), dbIndex);
   }
@@ -819,10 +823,6 @@ public class Client extends BinaryClient implements Commands {
 
   public void pexpireAt(final String key, final long millisecondsTimestamp) {
     pexpireAt(SafeEncoder.encode(key), millisecondsTimestamp);
-  }
-
-  public void pttl(final String key) {
-    pttl(SafeEncoder.encode(key));
   }
 
   public void incrByFloat(final String key, final double increment) {

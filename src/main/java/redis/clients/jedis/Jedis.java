@@ -332,6 +332,13 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     return client.getIntegerReply();
   }
 
+  @Override
+  public Long pttl(final String key) {
+    checkIsInMultiOrPipeline();
+    client.pttl(key);
+    return client.getIntegerReply();
+  }
+
   /**
    * Move the specified key from the currently selected DB to the specified destination DB. Note
    * that this command returns 1 only if the key was successfully moved, and 0 if the target key was
@@ -2968,12 +2975,6 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
   public Long pexpireAt(final String key, final long millisecondsTimestamp) {
     checkIsInMultiOrPipeline();
     client.pexpireAt(key, millisecondsTimestamp);
-    return client.getIntegerReply();
-  }
-
-  public Long pttl(final String key) {
-    checkIsInMultiOrPipeline();
-    client.pttl(key);
     return client.getIntegerReply();
   }
 
