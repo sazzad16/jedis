@@ -822,7 +822,7 @@ public class ShardedJedis extends BinaryShardedJedis implements JedisCommands, C
   }
 
   @Override
-  public long pfcount(String key) {
+  public Long pfcount(final String key) {
     Jedis j = getShard(key);
     return j.pfcount(key);
   }

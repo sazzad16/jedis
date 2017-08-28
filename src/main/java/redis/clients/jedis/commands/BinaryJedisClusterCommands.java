@@ -239,7 +239,7 @@ public interface BinaryJedisClusterCommands {
 
   Long pfadd(final byte[] key, final byte[]... elements);
 
-  long pfcount(final byte[] key);
+  Long pfcount(byte[] key);
 
   // Geo Commands
 
