@@ -233,22 +233,12 @@ public class Connection implements Closeable {
   }
 
   public String getStatusCodeReply() {
-    flush();
-    final byte[] resp = (byte[]) readProtocolWithCheckingBroken();
-    if (null == resp) {
-      return null;
-    } else {
-      return SafeEncoder.encode(resp);
-    }
+    return getBulkReply();
   }
 
   public String getBulkReply() {
     final byte[] result = getBinaryBulkReply();
-    if (null != result) {
-      return SafeEncoder.encode(result);
-    } else {
-      return null;
-    }
+    return (null != result) ? SafeEncoder.encode(result) : null;
   }
 
   public byte[] getBinaryBulkReply() {
