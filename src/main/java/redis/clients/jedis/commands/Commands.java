@@ -83,6 +83,8 @@ public interface Commands {
 
   void hset(String key, String field, String value);
 
+  void hset(String key, Map<String, String> hash);
+
   void hget(String key, String field);
 
   void hsetnx(String key, String field, String value);
