@@ -312,17 +312,17 @@ public interface Commands {
   void zscan(String key, String cursor, ScanParams params);
 
   void waitReplicas(int replicas, long timeout);
-  
+
   /**
    * Used for BITFIELD Redis command
-   * @param key 
-   * @param args
+   * @param key
+   * @param arguments
    */
-  void bitfield(String key, String...arguments);
-  
+  void bitfield(String key, String... arguments);
+
   /**
    * Used for HSTRLEN Redis command
-   * @param key 
+   * @param key
    * @param field
    */
   void hstrlen(String key, String field);
