@@ -305,7 +305,7 @@ public interface JedisCommands {
 
   Long pfadd(String key, String... elements);
 
-  long pfcount(String key);
+  Long pfcount(String key);
 
   // Geo Commands
 
