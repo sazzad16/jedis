@@ -263,6 +263,7 @@ public interface BinaryJedisClusterCommands {
   List<GeoRadiusResponse> georadiusByMember(byte[] key, byte[] member, double radius, GeoUnit unit,
       GeoRadiusParam param);
 
+  @Deprecated
   ScanResult<byte[]> scan(byte[] cursor, ScanParams params);
   
   ScanResult<Map.Entry<byte[], byte[]>> hscan(byte[] key, byte[] cursor);

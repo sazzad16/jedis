@@ -63,4 +63,6 @@ public interface MultiKeyBinaryJedisClusterCommands {
   String pfmerge(byte[] destkey, byte[]... sourcekeys);
 
   Long pfcount(byte[]... keys);
+
+  ScanResult<byte[]> scan(byte[] cursor, ScanParams params);
 }
