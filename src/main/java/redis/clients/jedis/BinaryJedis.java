@@ -2333,7 +2333,9 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
    */
   @Override
   public Set<byte[]> zrangeByScore(final byte[] key, final double min, final double max) {
-    return zrangeByScore(key, toByteArray(min), toByteArray(max));
+    checkIsInMultiOrPipeline();
+    client.zrangeByScore(key, min, max);
+    return SetFromList.of(client.getBinaryMultiBulkReply());
   }
 
   @Override
@@ -2393,7 +2395,9 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   @Override
   public Set<byte[]> zrangeByScore(final byte[] key, final double min, final double max,
       final int offset, final int count) {
-    return zrangeByScore(key, toByteArray(min), toByteArray(max), offset, count);
+    checkIsInMultiOrPipeline();
+    client.zrangeByScore(key, min, max, offset, count);
+    return SetFromList.of(client.getBinaryMultiBulkReply());
   }
 
   @Override
@@ -2453,7 +2457,9 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
    */
   @Override
   public Set<Tuple> zrangeByScoreWithScores(final byte[] key, final double min, final double max) {
-    return zrangeByScoreWithScores(key, toByteArray(min), toByteArray(max));
+    checkIsInMultiOrPipeline();
+    client.zrangeByScoreWithScores(key, min, max);
+    return getBinaryTupledSet();
   }
 
   @Override
@@ -2513,7 +2519,9 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   @Override
   public Set<Tuple> zrangeByScoreWithScores(final byte[] key, final double min, final double max,
       final int offset, final int count) {
-    return zrangeByScoreWithScores(key, toByteArray(min), toByteArray(max), offset, count);
+    checkIsInMultiOrPipeline();
+    client.zrangeByScoreWithScores(key, min, max, offset, count);
+    return getBinaryTupledSet();
   }
 
   @Override
@@ -2539,7 +2547,9 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
 
   @Override
   public Set<byte[]> zrevrangeByScore(final byte[] key, final double max, final double min) {
-    return zrevrangeByScore(key, toByteArray(max), toByteArray(min));
+    checkIsInMultiOrPipeline();
+    client.zrevrangeByScore(key, max, min);
+    return SetFromList.of(client.getBinaryMultiBulkReply());
   }
 
   @Override
@@ -2552,7 +2562,9 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   @Override
   public Set<byte[]> zrevrangeByScore(final byte[] key, final double max, final double min,
       final int offset, final int count) {
-    return zrevrangeByScore(key, toByteArray(max), toByteArray(min), offset, count);
+    checkIsInMultiOrPipeline();
+    client.zrevrangeByScore(key, max, min, offset, count);
+    return SetFromList.of(client.getBinaryMultiBulkReply());
   }
 
   @Override
@@ -2565,13 +2577,17 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
 
   @Override
   public Set<Tuple> zrevrangeByScoreWithScores(final byte[] key, final double max, final double min) {
-    return zrevrangeByScoreWithScores(key, toByteArray(max), toByteArray(min));
+    checkIsInMultiOrPipeline();
+    client.zrevrangeByScoreWithScores(key, max, min);
+    return getBinaryTupledSet();
   }
 
   @Override
   public Set<Tuple> zrevrangeByScoreWithScores(final byte[] key, final double max,
       final double min, final int offset, final int count) {
-    return zrevrangeByScoreWithScores(key, toByteArray(max), toByteArray(min), offset, count);
+    checkIsInMultiOrPipeline();
+    client.zrevrangeByScoreWithScores(key, max, min, offset, count);
+    return getBinaryTupledSet();
   }
 
   @Override
@@ -2621,7 +2637,9 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
    */
   @Override
   public Long zremrangeByScore(final byte[] key, final double start, final double end) {
-    return zremrangeByScore(key, toByteArray(start), toByteArray(end));
+    checkIsInMultiOrPipeline();
+    client.zremrangeByScore(key, start, end);
+    return client.getIntegerReply();
   }
 
   @Override
