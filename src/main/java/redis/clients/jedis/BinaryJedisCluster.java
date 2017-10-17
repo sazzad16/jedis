@@ -288,21 +288,21 @@ public class BinaryJedisCluster implements BasicCommands, BinaryJedisClusterComm
   }
 
   @Override
-  public String psetex(final byte[] key, final long milliseconds, final byte[] value) {
-    return new JedisClusterCommand<String>(connectionHandler, maxAttempts) {
-      @Override
-      public String execute(Jedis connection) {
-        return connection.psetex(key, milliseconds, value);
-      }
-    }.runBinary(key);
-  }
-
-  @Override
   public String setex(final byte[] key, final int seconds, final byte[] value) {
     return new JedisClusterCommand<String>(connectionHandler, maxAttempts) {
       @Override
       public String execute(Jedis connection) {
         return connection.setex(key, seconds, value);
+      }
+    }.runBinary(key);
+  }
+
+  @Override
+  public String psetex(final byte[] key, final long milliseconds, final byte[] value) {
+    return new JedisClusterCommand<String>(connectionHandler, maxAttempts) {
+      @Override
+      public String execute(Jedis connection) {
+        return connection.psetex(key, milliseconds, value);
       }
     }.runBinary(key);
   }

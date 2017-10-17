@@ -655,6 +655,20 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   }
 
   /**
+   * PSETEX works exactly like {@link #setex(byte[], int, byte[])} with the sole difference that the
+   * expire time is specified in milliseconds instead of seconds. Time complexity: O(1)
+   * @param key
+   * @param milliseconds
+   * @param value
+   * @return Status code reply
+   */
+  public String psetex(final byte[] key, final long milliseconds, final byte[] value) {
+    checkIsInMultiOrPipeline();
+    client.psetex(key, milliseconds, value);
+    return client.getStatusCodeReply();
+  }
+
+  /**
    * Set the the respective keys to the respective values. MSET will replace old values with new
    * values, while {@link #msetnx(byte[]...) MSETNX} will not perform any operation at all even if
    * just a single key already exists.
@@ -3311,20 +3325,6 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   @Deprecated
   public String psetex(final byte[] key, final int milliseconds, final byte[] value) {
     return psetex(key, (long) milliseconds, value);
-  }
-
-  /**
-   * PSETEX works exactly like {@link #setex(byte[], int, byte[])} with the sole difference that the
-   * expire time is specified in milliseconds instead of seconds. Time complexity: O(1)
-   * @param key
-   * @param milliseconds
-   * @param value
-   * @return Status code reply
-   */
-  public String psetex(final byte[] key, final long milliseconds, final byte[] value) {
-    checkIsInMultiOrPipeline();
-    client.psetex(key, milliseconds, value);
-    return client.getStatusCodeReply();
   }
 
   public String set(final byte[] key, final byte[] value, final byte[] nxxx) {
