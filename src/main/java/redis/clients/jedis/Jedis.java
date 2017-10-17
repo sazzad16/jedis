@@ -2811,18 +2811,18 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     return Slowlog.from(client.getObjectMultiBulkReply());
   }
 
-  public Long objectRefcount(String string) {
-    client.objectRefcount(string);
+  public Long objectRefcount(String key) {
+    client.objectRefcount(key);
     return client.getIntegerReply();
   }
 
-  public String objectEncoding(String string) {
-    client.objectEncoding(string);
+  public String objectEncoding(String key) {
+    client.objectEncoding(key);
     return client.getBulkReply();
   }
 
-  public Long objectIdletime(String string) {
-    client.objectIdletime(string);
+  public Long objectIdletime(String key) {
+    client.objectIdletime(key);
     return client.getIntegerReply();
   }
 
