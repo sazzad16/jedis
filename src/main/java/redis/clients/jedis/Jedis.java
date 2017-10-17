@@ -2138,7 +2138,6 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
   }
 
   private Set<Tuple> getTupledSet() {
-    checkIsInMultiOrPipeline();
     List<String> membersWithScores = client.getMultiBulkReply();
     if (membersWithScores == null) {
       return Collections.emptySet();
