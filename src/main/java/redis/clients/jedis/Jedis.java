@@ -1203,7 +1203,7 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     client.spop(key, count);
     final List<String> members = client.getMultiBulkReply();
     if (members == null) {
-      return Collections.emptySet();
+      return null;
     }
     return SetFromList.of(members);
   }
