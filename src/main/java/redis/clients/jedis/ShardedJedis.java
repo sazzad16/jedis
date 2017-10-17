@@ -210,6 +210,11 @@ public class ShardedJedis extends BinaryShardedJedis implements JedisCommands, C
     return j.hset(key, field, value);
   }
 
+  public Long hset(String key, Map<String, String> hash) {
+    Jedis j = getShard(key);
+    return j.hset(key, hash);
+  }
+
   public String hget(String key, String field) {
     Jedis j = getShard(key);
     return j.hget(key, field);

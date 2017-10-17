@@ -191,6 +191,14 @@ public class Client extends BinaryClient implements Commands {
     hset(SafeEncoder.encode(key), SafeEncoder.encode(field), SafeEncoder.encode(value));
   }
 
+  public void hset(final String key, final Map<String, String> hash) {
+    final Map<byte[], byte[]> bhash = new HashMap<byte[], byte[]>(hash.size());
+    for (final Entry<String, String> entry : hash.entrySet()) {
+      bhash.put(SafeEncoder.encode(entry.getKey()), SafeEncoder.encode(entry.getValue()));
+    }
+    hset(SafeEncoder.encode(key), bhash);
+  }
+
   public void hget(final String key, final String field) {
     hget(SafeEncoder.encode(key), SafeEncoder.encode(field));
   }
