@@ -70,6 +70,16 @@ public abstract class MultiKeyPipelineBase extends PipelineBase implements Basic
     return getResponse(BuilderFactory.LONG);
   }
 
+  public Response<Long> unlink(String... keys) {
+    client.unlink(keys);
+    return getResponse(BuilderFactory.LONG);
+  }
+
+  public Response<Long> unlink(byte[]... keys) {
+    client.unlink(keys);
+    return getResponse(BuilderFactory.LONG);
+  }
+
   public Response<Long> exists(String... keys) {
     client.exists(keys);
     return getResponse(BuilderFactory.LONG);

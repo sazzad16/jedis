@@ -250,6 +250,11 @@ public class ShardedJedis extends BinaryShardedJedis implements JedisCommands, C
     return j.del(key);
   }
 
+  public Long unlink(String key) {
+    Jedis j = getShard(key);
+    return j.unlink(key);
+  }
+
   public Long hdel(String key, String... fields) {
     Jedis j = getShard(key);
     return j.hdel(key, fields);

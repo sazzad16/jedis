@@ -1237,6 +1237,36 @@ public class JedisCluster extends BinaryJedisCluster implements JedisCommands,
   }
 
   @Override
+  public Long del(final String... keys) {
+    return new JedisClusterCommand<Long>(connectionHandler, maxAttempts) {
+      @Override
+      public Long execute(Jedis connection) {
+        return connection.del(keys);
+      }
+    }.run(keys.length, keys);
+  }
+
+  @Override
+  public Long unlink(final String key) {
+    return new JedisClusterCommand<Long>(connectionHandler, maxAttempts) {
+      @Override
+      public Long execute(Jedis connection) {
+        return connection.unlink(key);
+      }
+    }.run(key);
+  }
+
+  @Override
+  public Long unlink(final String... keys) {
+    return new JedisClusterCommand<Long>(connectionHandler, maxAttempts) {
+      @Override
+      public Long execute(Jedis connection) {
+        return connection.unlink(keys);
+      }
+    }.run(keys.length, keys);
+  }
+
+  @Override
   public String echo(final String string) {
     // note that it'll be run from arbitary node
     return new JedisClusterCommand<String>(connectionHandler, maxAttempts) {
@@ -1411,16 +1441,6 @@ public class JedisCluster extends BinaryJedisCluster implements JedisCommands,
         return connection.brpop(timeout, key);
       }
     }.run(key);
-  }
-
-  @Override
-  public Long del(final String... keys) {
-    return new JedisClusterCommand<Long>(connectionHandler, maxAttempts) {
-      @Override
-      public Long execute(Jedis connection) {
-        return connection.del(keys);
-      }
-    }.run(keys.length, keys);
   }
 
   @Override
