@@ -2,6 +2,7 @@ package redis.clients.jedis.commands;
 
 import redis.clients.jedis.*;
 import redis.clients.jedis.params.geo.GeoRadiusParam;
+import redis.clients.jedis.params.set.SetParams;
 import redis.clients.jedis.params.sortedset.ZAddParams;
 import redis.clients.jedis.params.sortedset.ZIncrByParams;
 
@@ -39,6 +40,10 @@ public interface RedisPipeline {
   Response<String> get(String key);
 
   Response<Boolean> getbit(String key, long offset);
+
+  Response<Long> bitpos(String key, boolean value);
+
+  Response<Long> bitpos(String key, boolean value, BitPosParams params);
 
   Response<String> getrange(String key, long startOffset, long endOffset);
 
@@ -112,6 +117,8 @@ public interface RedisPipeline {
 
   Response<String> set(String key, String value);
 
+  Response<String> set(String key, String value, SetParams params);
+
   Response<Boolean> setbit(String key, long offset, boolean value);
 
   Response<String> setex(String key, int seconds, String value);
@@ -131,6 +138,8 @@ public interface RedisPipeline {
   Response<Set<String>> spop(String key, long count);
 
   Response<String> srandmember(String key);
+
+  Response<List<String>> srandmember(String key, int count);
 
   Response<Long> srem(String key, String... member);
 
@@ -158,6 +167,8 @@ public interface RedisPipeline {
 
   Response<Long> zcount(String key, double min, double max);
 
+  Response<Long> zcount(String key, String min, String max);
+
   Response<Double> zincrby(String key, double score, String member);
 
   Response<Double> zincrby(String key, double score, String member, ZIncrByParams params);
@@ -170,9 +181,16 @@ public interface RedisPipeline {
 
   Response<Set<String>> zrangeByScore(String key, double min, double max, int offset, int count);
 
+  Response<Set<String>> zrangeByScore(String key, String min, String max, int offset, int count);
+
   Response<Set<Tuple>> zrangeByScoreWithScores(String key, double min, double max);
 
+  Response<Set<Tuple>> zrangeByScoreWithScores(String key, String min, String max);
+
   Response<Set<Tuple>> zrangeByScoreWithScores(String key, double min, double max, int offset,
+      int count);
+
+  Response<Set<Tuple>> zrangeByScoreWithScores(String key, String min, String max, int offset,
       int count);
 
   Response<Set<String>> zrevrangeByScore(String key, double max, double min);
@@ -181,9 +199,16 @@ public interface RedisPipeline {
 
   Response<Set<String>> zrevrangeByScore(String key, double max, double min, int offset, int count);
 
+  Response<Set<String>> zrevrangeByScore(String key, String max, String min, int offset, int count);
+
   Response<Set<Tuple>> zrevrangeByScoreWithScores(String key, double max, double min);
 
+  Response<Set<Tuple>> zrevrangeByScoreWithScores(String key, String max, String min);
+
   Response<Set<Tuple>> zrevrangeByScoreWithScores(String key, double max, double min, int offset,
+      int count);
+
+  Response<Set<Tuple>> zrevrangeByScoreWithScores(String key, String max, String min, int offset,
       int count);
 
   Response<Set<Tuple>> zrangeWithScores(String key, long start, long end);
@@ -195,6 +220,8 @@ public interface RedisPipeline {
   Response<Long> zremrangeByRank(String key, long start, long end);
 
   Response<Long> zremrangeByScore(String key, double start, double end);
+
+  Response<Long> zremrangeByScore(String key, String start, String end);
 
   Response<Set<String>> zrevrange(String key, long start, long end);
 
@@ -229,6 +256,18 @@ public interface RedisPipeline {
   Response<List<Long>> bitfield(String key, String... arguments);
   
   Response<Long> hstrlen(String key, String field);
+
+  Response<Long> objectRefcount(String key);
+
+  Response<String> objectEncoding(String key);
+
+  Response<Long> objectIdletime(String key);
+
+  Response<Double> incrByFloat(String key, double increment);
+
+  Response<String> psetex(String key, long milliseconds, String value);
+
+  Response<Double> hincrByFloat(String key, String field, double increment);
 
   // Geo Commands
 
