@@ -17,7 +17,8 @@ import static redis.clients.jedis.Protocol.Command.PSUBSCRIBE;
 import static redis.clients.jedis.Protocol.Command.PUNSUBSCRIBE;
 import static redis.clients.jedis.Protocol.Command.SUBSCRIBE;
 import static redis.clients.jedis.Protocol.Command.UNSUBSCRIBE;
-import static redis.clients.jedis.Protocol.Keyword.*;
+import static redis.clients.jedis.Protocol.Keyword.LIMIT;
+import static redis.clients.jedis.Protocol.Keyword.WITHSCORES;
 import static redis.clients.jedis.Protocol.toByteArray;
 
 import javax.net.ssl.HostnameVerifier;
@@ -565,13 +566,13 @@ public class BinaryClient extends Connection {
     final List<byte[]> args = new ArrayList<byte[]>();
     args.add(key);
     args.addAll(sortingParameters.getParams());
-    args.add(STORE.raw);
+    args.add(Keyword.STORE.raw);
     args.add(dstkey);
     sendCommand(SORT, args.toArray(new byte[args.size()][]));
   }
 
   public void sort(final byte[] key, final byte[] dstkey) {
-    sendCommand(SORT, key, STORE.raw, dstkey);
+    sendCommand(SORT, key, Keyword.STORE.raw, dstkey);
   }
 
   public void brpop(final byte[][] args) {
@@ -889,7 +890,7 @@ public class BinaryClient extends Connection {
   }
 
   public void slaveofNoOne() {
-    sendCommand(SLAVEOF, NO.raw, ONE.raw);
+    sendCommand(SLAVEOF, Keyword.NO.raw, Keyword.ONE.raw);
   }
 
   public void configGet(final byte[] pattern) {
@@ -1049,23 +1050,23 @@ public class BinaryClient extends Connection {
   }
 
   public void slowlogReset() {
-    sendCommand(SLOWLOG, RESET.raw);
+    sendCommand(SLOWLOG, Keyword.RESET.raw);
   }
 
   public void slowlogLen() {
-    sendCommand(SLOWLOG, LEN.raw);
+    sendCommand(SLOWLOG, Keyword.LEN.raw);
   }
 
-  public void objectRefcount(byte[] key) {
-    sendCommand(OBJECT, REFCOUNT.raw, key);
+  public void objectRefcount(final byte[] key) {
+    sendCommand(OBJECT, Keyword.REFCOUNT.raw, key);
   }
 
-  public void objectIdletime(byte[] key) {
-    sendCommand(OBJECT, IDLETIME.raw, key);
+  public void objectIdletime(final byte[] key) {
+    sendCommand(OBJECT, Keyword.IDLETIME.raw, key);
   }
 
-  public void objectEncoding(byte[] key) {
-    sendCommand(OBJECT, ENCODING.raw, key);
+  public void objectEncoding(final byte[] key) {
+    sendCommand(OBJECT, Keyword.ENCODING.raw, key);
   }
 
   public void bitcount(byte[] key) {
