@@ -39,6 +39,10 @@ public interface BinaryRedisPipeline {
 
   Response<Boolean> getbit(byte[] key, long offset);
 
+  Response<Long> bitpos(byte[] key, boolean value);
+
+  Response<Long> bitpos(byte[] key, boolean value, BitPosParams params);
+
   Response<byte[]> getSet(byte[] key, byte[] value);
 
   Response<Long> getrange(byte[] key, long startOffset, long endOffset);
@@ -133,6 +137,8 @@ public interface BinaryRedisPipeline {
 
   Response<byte[]> srandmember(byte[] key);
 
+  Response<List<byte[]>> srandmember(byte[] key, int count);
+
   Response<Long> srem(byte[] key, byte[]... member);
 
   Response<Long> strlen(byte[] key);
@@ -142,6 +148,8 @@ public interface BinaryRedisPipeline {
   Response<Long> touch(byte[] keys);
 
   Response<Long> ttl(byte[] key);
+
+  Response<Long> pttl(byte[] key);
 
   Response<String> type(byte[] key);
 
@@ -156,6 +164,8 @@ public interface BinaryRedisPipeline {
   Response<Long> zcard(byte[] key);
 
   Response<Long> zcount(byte[] key, double min, double max);
+
+  Response<Long> zcount(byte[] key, byte[] min, byte[] max);
 
   Response<Double> zincrby(byte[] key, double score, byte[] member);
 
@@ -240,6 +250,18 @@ public interface BinaryRedisPipeline {
   Response<Long> pfadd(byte[] key, byte[]... elements);
 
   Response<Long> pfcount(byte[] key);
+
+  Response<Long> objectRefcount(byte[] key);
+
+  Response<byte[]> objectEncoding(byte[] key);
+
+  Response<Long> objectIdletime(byte[] key);
+
+  Response<Double> incrByFloat(byte[] key, double increment);
+
+  Response<String> psetex(byte[] key, long milliseconds, byte[] value);
+
+  Response<Double> hincrByFloat(byte[] key, byte[] field, double increment);
 
   // Geo Commands
 
