@@ -1771,20 +1771,14 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   public Double zincrby(final byte[] key, final double score, final byte[] member) {
     checkIsInMultiOrPipeline();
     client.zincrby(key, score, member);
-    String newscore = client.getBulkReply();
-    return Double.valueOf(newscore);
+    return BuilderFactory.DOUBLE.build(client.getOne());
   }
 
   @Override
   public Double zincrby(final byte[] key, final double score, final byte[] member, final ZIncrByParams params) {
     checkIsInMultiOrPipeline();
     client.zincrby(key, score, member, params);
-    String newscore = client.getBulkReply();
-
-    // with nx / xx options it could return null now
-    if (newscore == null) return null;
-
-    return Double.valueOf(newscore);
+    return BuilderFactory.DOUBLE.build(client.getOne());
   }
 
   /**
@@ -2549,7 +2543,7 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
     Set<Tuple> set = new LinkedHashSet<Tuple>(membersWithScores.size() / 2, 1.0f);
     Iterator<byte[]> iterator = membersWithScores.iterator();
     while (iterator.hasNext()) {
-      set.add(new Tuple(iterator.next(), Double.valueOf(SafeEncoder.encode(iterator.next()))));
+      set.add(new Tuple(iterator.next(), BuilderFactory.DOUBLE.build(iterator.next())));
     }
     return set;
   }
@@ -3645,7 +3639,7 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
     List<byte[]> rawResults = (List<byte[]>) result.get(1);
     Iterator<byte[]> iterator = rawResults.iterator();
     while (iterator.hasNext()) {
-      results.add(new Tuple(iterator.next(), Double.valueOf(SafeEncoder.encode(iterator.next()))));
+      results.add(new Tuple(iterator.next(), BuilderFactory.DOUBLE.build(iterator.next())));
     }
     return new ScanResult<Tuple>(newcursor, results);
   }

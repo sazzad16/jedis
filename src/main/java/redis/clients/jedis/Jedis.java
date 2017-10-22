@@ -1573,20 +1573,14 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
   public Double zincrby(final String key, final double score, final String member) {
     checkIsInMultiOrPipeline();
     client.zincrby(key, score, member);
-    String newscore = client.getBulkReply();
-    return Double.valueOf(newscore);
+    return BuilderFactory.DOUBLE.build(client.getOne());
   }
 
   @Override
   public Double zincrby(final String key, final double score, final String member, final ZIncrByParams params) {
     checkIsInMultiOrPipeline();
     client.zincrby(key, score, member, params);
-    String newscore = client.getBulkReply();
-
-    // with nx / xx options it could return null now
-    if (newscore == null) return null;
-
-    return Double.valueOf(newscore);
+    return BuilderFactory.DOUBLE.build(client.getOne());
   }
 
   /**
@@ -1686,8 +1680,7 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
   public Double zscore(final String key, final String member) {
     checkIsInMultiOrPipeline();
     client.zscore(key, member);
-    final String score = client.getBulkReply();
-    return (score != null ? new Double(score) : null);
+    return BuilderFactory.DOUBLE.build(client.getOne());
   }
 
   @Override
@@ -3263,8 +3256,7 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     List<byte[]> rawResults = (List<byte[]>) result.get(1);
     Iterator<byte[]> iterator = rawResults.iterator();
     while (iterator.hasNext()) {
-      results.add(new Tuple(SafeEncoder.encode(iterator.next()), Double.valueOf(SafeEncoder
-          .encode(iterator.next()))));
+      results.add(new Tuple(SafeEncoder.encode(iterator.next()), BuilderFactory.DOUBLE.build(iterator.next())));
     }
     return new ScanResult<Tuple>(newcursor, results);
   }
