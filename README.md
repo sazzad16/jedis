@@ -1,3 +1,6 @@
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.sazzad16/jedis.svg)](http://mvnrepository.com/artifact/com.github.sazzad16/jedis)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE.txt)
+
 # Jedis
 
 This is a fork of [xetorthio/jedis](https://github.com/xetorthio/jedis)
