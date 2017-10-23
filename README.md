@@ -3,7 +3,7 @@
 
 # Jedis
 
-This is a fork of [xetorthio/jedis](https://github.com/xetorthio/jedis)
+This is a fork of [xetorthio/jedis](https://github.com/xetorthio/jedis), a java client for [antirez/redis](https://github.com/antirez/redis).
 
 ## How do I use it?
 
