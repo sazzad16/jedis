@@ -20,7 +20,7 @@
   <artifactId>jedis</artifactId>
   <version>2.9.2-SNAPSHOT</version>
   <name>Jedis</name>
-  <description>A fork of https://github.com/xetorthio/jedis</description>
+  <description>A java client for github.com/antirez/redis, a fork of github.com/xetorthio/jedis</description>
   <url>https://github.com/sazzad16/jedis</url>
 
   <licenses>
