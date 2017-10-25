@@ -235,12 +235,23 @@ public class Connection implements Closeable {
   }
 
   public String getStatusCodeReply() {
-    return getBulkReply();
+    flush();
+    pipelinedCommands--;
+    final byte[] resp = (byte[]) readProtocolWithCheckingBroken();
+    if (null == resp) {
+      return null;
+    } else {
+      return SafeEncoder.encode(resp);
+    }
   }
 
   public String getBulkReply() {
     final byte[] result = getBinaryBulkReply();
-    return (null != result) ? SafeEncoder.encode(result) : null;
+    if (null != result) {
+      return SafeEncoder.encode(result);
+    } else {
+      return null;
+    }
   }
 
   public byte[] getBinaryBulkReply() {
@@ -272,12 +283,12 @@ public class Connection implements Closeable {
 
   @SuppressWarnings("unchecked")
   public List<Object> getRawObjectMultiBulkReply() {
-    flush();
-    pipelinedCommands--;
     return (List<Object>) readProtocolWithCheckingBroken();
   }
 
   public List<Object> getObjectMultiBulkReply() {
+    flush();
+    pipelinedCommands--;
     return getRawObjectMultiBulkReply();
   }
 
