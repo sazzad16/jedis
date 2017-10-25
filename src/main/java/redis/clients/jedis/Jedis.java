@@ -130,7 +130,8 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
    * @param value
    * @return Status code reply
    */
-  public String set(final String key, String value) {
+  @Override
+  public String set(final String key, final String value) {
     checkIsInMultiOrPipeline();
     client.set(key, value);
     return client.getStatusCodeReply();
@@ -209,7 +210,8 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     return client.getIntegerReply();
   }
 
-  public Long del(String key) {
+  @Override
+  public Long del(final String key) {
     checkIsInMultiOrPipeline();
     client.del(key);
     return client.getIntegerReply();
@@ -397,7 +399,7 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
   }
 
   @Override
-  public Long touch(String key) {
+  public Long touch(final String key) {
     checkIsInMultiOrPipeline();
     client.touch(key);
     return client.getIntegerReply();
@@ -1441,7 +1443,7 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
   }
 
   @Override
-  public Long zadd(String key, Map<String, Double> scoreMembers, ZAddParams params) {
+  public Long zadd(final String key, final Map<String, Double> scoreMembers, final ZAddParams params) {
     checkIsInMultiOrPipeline();
     client.zadd(key, scoreMembers, params);
     return client.getIntegerReply();
@@ -1497,7 +1499,7 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
   }
 
   @Override
-  public Double zincrby(String key, double score, String member, ZIncrByParams params) {
+  public Double zincrby(final String key, final double score, final String member, final ZIncrByParams params) {
     checkIsInMultiOrPipeline();
     client.zincrby(key, score, member, params);
     return BuilderFactory.DOUBLE.build(client.getOne());
@@ -1777,7 +1779,8 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     return args;
   }
 
-  public List<String> blpop(String... args) {
+  @Override
+  public List<String> blpop(final String... args) {
     checkIsInMultiOrPipeline();
     client.blpop(args);
     client.setTimeoutInfinite();
@@ -1788,7 +1791,8 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     }
   }
 
-  public List<String> brpop(String... args) {
+  @Override
+  public List<String> brpop(final String... args) {
     checkIsInMultiOrPipeline();
     client.brpop(args);
     client.setTimeoutInfinite();
@@ -2442,7 +2446,7 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
   }
 
   @Override
-  public Set<String> zrevrangeByLex(String key, String max, String min) {
+  public Set<String> zrevrangeByLex(final String key, final String max, final String min) {
     checkIsInMultiOrPipeline();
     client.zrevrangeByLex(key, max, min);
     final List<String> members = client.getMultiBulkReply();
@@ -2450,7 +2454,7 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
   }
 
   @Override
-  public Set<String> zrevrangeByLex(String key, String max, String min, int offset, int count) {
+  public Set<String> zrevrangeByLex(final String key, final String max, final String min, final int offset, final int count) {
     checkIsInMultiOrPipeline();
     client.zrevrangeByLex(key, max, min, offset, count);
     final List<String> members = client.getMultiBulkReply();
@@ -2515,7 +2519,8 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
    * @param timeout
    * @return the element
    */
-  public String brpoplpush(String source, String destination, int timeout) {
+  @Override
+  public String brpoplpush(final String source, final String destination, final int timeout) {
     client.brpoplpush(source, destination, timeout);
     client.setTimeoutInfinite();
     try {
@@ -2532,13 +2537,15 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
    * @param value
    * @return
    */
-  public Boolean setbit(String key, long offset, boolean value) {
+  @Override
+  public Boolean setbit(final String key, final long offset, final boolean value) {
     checkIsInMultiOrPipeline();
     client.setbit(key, offset, value);
     return client.getIntegerReply() == 1;
   }
 
-  public Boolean setbit(String key, long offset, String value) {
+  @Override
+  public Boolean setbit(final String key, final long offset, final String value) {
     checkIsInMultiOrPipeline();
     client.setbit(key, offset, value);
     return client.getIntegerReply() == 1;
@@ -2550,19 +2557,22 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
    * @param offset
    * @return
    */
-  public Boolean getbit(String key, long offset) {
+  @Override
+  public Boolean getbit(final String key, final long offset) {
     checkIsInMultiOrPipeline();
     client.getbit(key, offset);
     return client.getIntegerReply() == 1;
   }
 
-  public Long setrange(String key, long offset, String value) {
+  @Override
+  public Long setrange(final String key, final long offset, final String value) {
     checkIsInMultiOrPipeline();
     client.setrange(key, offset, value);
     return client.getIntegerReply();
   }
 
-  public String getrange(String key, long startOffset, long endOffset) {
+  @Override
+  public String getrange(final String key, final long startOffset, final long endOffset) {
     checkIsInMultiOrPipeline();
     client.getrange(key, startOffset, endOffset);
     return client.getBulkReply();
@@ -2651,7 +2661,8 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     return client.getStatusCodeReply();
   }
 
-  public Object eval(String script, int keyCount, String... params) {
+  @Override
+  public Object eval(final String script, final int keyCount, final String... params) {
     client.setTimeoutInfinite();
     try {
       client.eval(script, keyCount, params);
@@ -2702,16 +2713,18 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     return params;
   }
 
-  public Object eval(String script, List<String> keys, List<String> args) {
+  @Override
+  public Object eval(final String script, final List<String> keys, final List<String> args) {
     return eval(script, keys.size(), getParams(keys, args));
   }
 
-  public Object eval(String script) {
+  @Override
+  public Object eval(final String script) {
     return eval(script, 0);
   }
 
   @Override
-  public Object evalsha(String sha1) {
+  public Object evalsha(final String sha1) {
     return evalsha(sha1, 0);
   }
 
@@ -2735,23 +2748,27 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     return result;
   }
 
-  public Object evalsha(String sha1, List<String> keys, List<String> args) {
+  @Override
+  public Object evalsha(final String sha1, final List<String> keys, final List<String> args) {
     return evalsha(sha1, keys.size(), getParams(keys, args));
   }
 
-  public Object evalsha(String sha1, int keyCount, String... params) {
+  @Override
+  public Object evalsha(final String sha1, final int keyCount, final String... params) {
     checkIsInMultiOrPipeline();
     client.evalsha(sha1, keyCount, params);
     return getEvalResult();
   }
 
-  public Boolean scriptExists(String sha1) {
+  @Override
+  public Boolean scriptExists(final String sha1) {
     String[] a = new String[1];
     a[0] = sha1;
     return scriptExists(a).get(0);
   }
 
-  public List<Boolean> scriptExists(String... sha1) {
+  @Override
+  public List<Boolean> scriptExists(final String... sha1) {
     client.scriptExists(sha1);
     List<Long> result = client.getIntegerMultiBulkReply();
     List<Boolean> exists = new ArrayList<Boolean>();
@@ -2762,7 +2779,8 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     return exists;
   }
 
-  public String scriptLoad(String script) {
+  @Override
+  public String scriptLoad(final String script) {
     client.scriptLoad(script);
     return client.getBulkReply();
   }
@@ -2772,23 +2790,27 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     return Slowlog.from(client.getObjectMultiBulkReply());
   }
 
-  public List<Slowlog> slowlogGet(long entries) {
+  @Override
+  public List<Slowlog> slowlogGet(final long entries) {
     client.slowlogGet(entries);
     return Slowlog.from(client.getObjectMultiBulkReply());
   }
 
-  public Long objectRefcount(String key) {
-    client.objectRefcount(key);
+  @Override
+  public Long objectRefcount(final String string) {
+    client.objectRefcount(string);
     return client.getIntegerReply();
   }
 
-  public String objectEncoding(String key) {
-    client.objectEncoding(key);
+  @Override
+  public String objectEncoding(final String string) {
+    client.objectEncoding(string);
     return client.getBulkReply();
   }
 
-  public Long objectIdletime(String key) {
-    client.objectIdletime(key);
+  @Override
+  public Long objectIdletime(final String string) {
+    client.objectIdletime(string);
     return client.getIntegerReply();
   }
 
@@ -2798,13 +2820,15 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     return client.getIntegerReply();
   }
 
-  public Long bitcount(final String key, long start, long end) {
+  @Override
+  public Long bitcount(final String key, final long start, final long end) {
     checkIsInMultiOrPipeline();
     client.bitcount(key, start, end);
     return client.getIntegerReply();
   }
 
-  public Long bitop(BitOP op, final String destKey, String... srcKeys) {
+  @Override
+  public Long bitop(final BitOP op, final String destKey, final String... srcKeys) {
     checkIsInMultiOrPipeline();
     client.bitop(op, destKey, srcKeys);
     return client.getIntegerReply();
@@ -2862,7 +2886,8 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
    * @param masterName
    * @return two elements list of strings : host and port.
    */
-  public List<String> sentinelGetMasterAddrByName(String masterName) {
+  @Override
+  public List<String> sentinelGetMasterAddrByName(final String masterName) {
     client.sentinel(Protocol.SENTINEL_GET_MASTER_ADDR_BY_NAME, masterName);
     final List<Object> reply = client.getObjectMultiBulkReply();
     return BuilderFactory.STRING_LIST.build(reply);
@@ -2876,7 +2901,8 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
    * @param pattern
    * @return
    */
-  public Long sentinelReset(String pattern) {
+  @Override
+  public Long sentinelReset(final String pattern) {
     client.sentinel(Protocol.SENTINEL_RESET, pattern);
     return client.getIntegerReply();
   }
@@ -2917,7 +2943,7 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
    * @return
    */
   @SuppressWarnings("rawtypes")
-  public List<Map<String, String>> sentinelSlaves(String masterName) {
+  public List<Map<String, String>> sentinelSlaves(final String masterName) {
     client.sentinel(Protocol.SENTINEL_SLAVES, masterName);
     final List<Object> reply = client.getObjectMultiBulkReply();
 
@@ -2928,23 +2954,27 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     return slaves;
   }
 
-  public String sentinelFailover(String masterName) {
+  @Override
+  public String sentinelFailover(final String masterName) {
     client.sentinel(Protocol.SENTINEL_FAILOVER, masterName);
     return client.getStatusCodeReply();
   }
 
-  public String sentinelMonitor(String masterName, String ip, int port, int quorum) {
+  @Override
+  public String sentinelMonitor(final String masterName, final String ip, final int port, final int quorum) {
     client.sentinel(Protocol.SENTINEL_MONITOR, masterName, ip, String.valueOf(port),
       String.valueOf(quorum));
     return client.getStatusCodeReply();
   }
 
-  public String sentinelRemove(String masterName) {
+  @Override
+  public String sentinelRemove(final String masterName) {
     client.sentinel(Protocol.SENTINEL_REMOVE, masterName);
     return client.getStatusCodeReply();
   }
 
-  public String sentinelSet(String masterName, Map<String, String> parameterMap) {
+  @Override
+  public String sentinelSet(final String masterName, final Map<String, String> parameterMap) {
     int index = 0;
     int paramsLength = parameterMap.size() * 2 + 2;
     String[] params = new String[paramsLength];
@@ -3366,7 +3396,7 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     return client.getStatusCodeReply();
   }
 
-  public List<String> pubsubChannels(String pattern) {
+  public List<String> pubsubChannels(final String pattern) {
     checkIsInMultiOrPipeline();
     client.pubsubChannels(pattern);
     return client.getMultiBulkReply();
@@ -3427,31 +3457,31 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
   }
 
   @Override
-  public List<String> blpop(int timeout, String key) {
+  public List<String> blpop(final int timeout, final String key) {
     return blpop(key, String.valueOf(timeout));
   }
 
   @Override
-  public List<String> brpop(int timeout, String key) {
+  public List<String> brpop(final int timeout, final String key) {
     return brpop(key, String.valueOf(timeout));
   }
 
   @Override
-  public Long geoadd(String key, double longitude, double latitude, String member) {
+  public Long geoadd(final String key, final double longitude, final double latitude, final String member) {
     checkIsInMultiOrPipeline();
     client.geoadd(key, longitude, latitude, member);
     return client.getIntegerReply();
   }
 
   @Override
-  public Long geoadd(String key, Map<String, GeoCoordinate> memberCoordinateMap) {
+  public Long geoadd(final String key, final Map<String, GeoCoordinate> memberCoordinateMap) {
     checkIsInMultiOrPipeline();
     client.geoadd(key, memberCoordinateMap);
     return client.getIntegerReply();
   }
 
   @Override
-  public Double geodist(String key, String member1, String member2) {
+  public Double geodist(final String key, final String member1, final String member2) {
     checkIsInMultiOrPipeline();
     client.geodist(key, member1, member2);
     String dval = client.getBulkReply();
@@ -3459,7 +3489,7 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
   }
 
   @Override
-  public Double geodist(String key, String member1, String member2, GeoUnit unit) {
+  public Double geodist(final String key, final String member1, final String member2, final GeoUnit unit) {
     checkIsInMultiOrPipeline();
     client.geodist(key, member1, member2, unit);
     String dval = client.getBulkReply();
@@ -3467,60 +3497,60 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
   }
 
   @Override
-  public List<String> geohash(String key, String... members) {
+  public List<String> geohash(final String key, String... members) {
     checkIsInMultiOrPipeline();
     client.geohash(key, members);
     return client.getMultiBulkReply();
   }
 
   @Override
-  public List<GeoCoordinate> geopos(String key, String... members) {
+  public List<GeoCoordinate> geopos(final String key, String... members) {
     checkIsInMultiOrPipeline();
     client.geopos(key, members);
     return BuilderFactory.GEO_COORDINATE_LIST.build(client.getObjectMultiBulkReply());
   }
 
   @Override
-  public List<GeoRadiusResponse> georadius(String key, double longitude, double latitude,
-      double radius, GeoUnit unit) {
+  public List<GeoRadiusResponse> georadius(final String key, final double longitude, final double latitude,
+      final double radius, final GeoUnit unit) {
     checkIsInMultiOrPipeline();
     client.georadius(key, longitude, latitude, radius, unit);
     return BuilderFactory.GEORADIUS_WITH_PARAMS_RESULT.build(client.getObjectMultiBulkReply());
   }
 
   @Override
-  public List<GeoRadiusResponse> georadius(String key, double longitude, double latitude,
-      double radius, GeoUnit unit, GeoRadiusParam param) {
+  public List<GeoRadiusResponse> georadius(final String key, final double longitude, final double latitude,
+      final double radius, final GeoUnit unit, final GeoRadiusParam param) {
     checkIsInMultiOrPipeline();
     client.georadius(key, longitude, latitude, radius, unit, param);
     return BuilderFactory.GEORADIUS_WITH_PARAMS_RESULT.build(client.getObjectMultiBulkReply());
   }
 
   @Override
-  public List<GeoRadiusResponse> georadiusByMember(String key, String member, double radius,
-      GeoUnit unit) {
+  public List<GeoRadiusResponse> georadiusByMember(final String key, final String member, final double radius,
+      final GeoUnit unit) {
     checkIsInMultiOrPipeline();
     client.georadiusByMember(key, member, radius, unit);
     return BuilderFactory.GEORADIUS_WITH_PARAMS_RESULT.build(client.getObjectMultiBulkReply());
   }
 
   @Override
-  public List<GeoRadiusResponse> georadiusByMember(String key, String member, double radius,
-      GeoUnit unit, GeoRadiusParam param) {
+  public List<GeoRadiusResponse> georadiusByMember(final String key, final String member, final double radius,
+      final GeoUnit unit, final GeoRadiusParam param) {
     checkIsInMultiOrPipeline();
     client.georadiusByMember(key, member, radius, unit, param);
     return BuilderFactory.GEORADIUS_WITH_PARAMS_RESULT.build(client.getObjectMultiBulkReply());
   }
 
   @Override
-  public List<Long> bitfield(String key, String...arguments) {
+  public List<Long> bitfield(final String key, final String...arguments) {
     checkIsInMultiOrPipeline();
     client.bitfield(key, arguments);
     return client.getIntegerMultiBulkReply();
   }
 
   @Override
-  public Long hstrlen(String key, String field) {
+  public Long hstrlen(final String key, final String field) {
     checkIsInMultiOrPipeline();
     client.hstrlen(key, field);
     return client.getIntegerReply();

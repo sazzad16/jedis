@@ -1318,7 +1318,7 @@ public class BinaryJedisCluster implements BasicCommands, BinaryJedisClusterComm
   }
 
   @Override
-  public Object eval(final byte[] script, byte[] key) {
+  public Object eval(final byte[] script, final byte[] key) {
     return new JedisClusterCommand<Object>(connectionHandler, maxAttempts) {
       @Override
       public Object execute(Jedis connection) {
@@ -1328,7 +1328,7 @@ public class BinaryJedisCluster implements BasicCommands, BinaryJedisClusterComm
   }
 
   @Override
-  public Object evalsha(final byte[] sha1, byte[] key) {
+  public Object evalsha(final byte[] sha1, final byte[] key) {
     return new JedisClusterCommand<Object>(connectionHandler, maxAttempts) {
       @Override
       public Object execute(Jedis connection) {
@@ -1388,7 +1388,7 @@ public class BinaryJedisCluster implements BasicCommands, BinaryJedisClusterComm
   }
 
   @Override
-  public String scriptKill(byte[] key) {
+  public String scriptKill(final byte[] key) {
     return new JedisClusterCommand<String>(connectionHandler, maxAttempts) {
       @Override
       public String execute(Jedis connection) {
