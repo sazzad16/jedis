@@ -19,20 +19,20 @@ import redis.clients.util.JedisClusterHashTagUtil;
 public class BinaryJedisCluster implements BasicCommands, BinaryJedisClusterCommands,
     MultiKeyBinaryJedisClusterCommands, JedisClusterBinaryScriptingCommands, Closeable {
 
-  public static final short HASHSLOTS = 16384;
+  public static final int HASHSLOTS = 16384;
   protected static final int DEFAULT_TIMEOUT = 2000;
-  protected static final int DEFAULT_MAX_REDIRECTIONS = 5;
+  protected static final int DEFAULT_MAX_ATTEMPTS = 5;
 
   protected int maxAttempts;
 
   protected JedisClusterConnectionHandler connectionHandler;
 
-  public BinaryJedisCluster(Set<HostAndPort> nodes, int timeout) {
-    this(nodes, timeout, DEFAULT_MAX_REDIRECTIONS, new GenericObjectPoolConfig());
-  }
-
   public BinaryJedisCluster(Set<HostAndPort> nodes) {
     this(nodes, DEFAULT_TIMEOUT);
+  }
+
+  public BinaryJedisCluster(Set<HostAndPort> nodes, int timeout) {
+    this(nodes, timeout, DEFAULT_MAX_ATTEMPTS, new GenericObjectPoolConfig());
   }
 
   public BinaryJedisCluster(Set<HostAndPort> jedisClusterNode, int timeout, int maxAttempts,
