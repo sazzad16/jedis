@@ -18,7 +18,7 @@ import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocketFactory;
 
 public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommands,
-    AdvancedJedisCommands, ScriptingCommands, BasicCommands, ClusterCommands, SentinelCommands {
+    AdvancedJedisCommands, ScriptingCommands, ClusterCommands, SentinelCommands {
 
   protected Pool<Jedis> dataSource = null;
 
