@@ -17,7 +17,7 @@ import redis.clients.util.SafeEncoder;
 
 public abstract class JedisPubSub {
 
-  private static final String JEDIS_SUBSCRIPTION_MESSAGE = "JedisPubSub is not subscribed to a Jedis instance.";
+  private static final String SUBSCRIPTION_FAIL_MESSAGE = "JedisPubSub is not subscribed to a Jedis instance.";
   private int subscribedChannels = 0;
   private volatile Client client;
 
@@ -45,7 +45,7 @@ public abstract class JedisPubSub {
 
   public void unsubscribe() {
     if (client == null) {
-      throw new JedisConnectionException(JEDIS_SUBSCRIPTION_MESSAGE);
+      throw new JedisConnectionException(SUBSCRIPTION_FAIL_MESSAGE);
     }
     client.unsubscribe();
     client.flush();
@@ -53,7 +53,7 @@ public abstract class JedisPubSub {
 
   public void unsubscribe(String... channels) {
     if (client == null) {
-      throw new JedisConnectionException(JEDIS_SUBSCRIPTION_MESSAGE);
+      throw new JedisConnectionException(SUBSCRIPTION_FAIL_MESSAGE);
     }
     client.unsubscribe(channels);
     client.flush();
@@ -61,7 +61,7 @@ public abstract class JedisPubSub {
 
   public void subscribe(String... channels) {
     if (client == null) {
-      throw new JedisConnectionException(JEDIS_SUBSCRIPTION_MESSAGE);
+      throw new JedisConnectionException(SUBSCRIPTION_FAIL_MESSAGE);
     }
     client.subscribe(channels);
     client.flush();
@@ -69,7 +69,7 @@ public abstract class JedisPubSub {
 
   public void psubscribe(String... patterns) {
     if (client == null) {
-      throw new JedisConnectionException(JEDIS_SUBSCRIPTION_MESSAGE);
+      throw new JedisConnectionException(SUBSCRIPTION_FAIL_MESSAGE);
     }
     client.psubscribe(patterns);
     client.flush();
@@ -77,7 +77,7 @@ public abstract class JedisPubSub {
 
   public void punsubscribe() {
     if (client == null) {
-      throw new JedisConnectionException(JEDIS_SUBSCRIPTION_MESSAGE);
+      throw new JedisConnectionException(SUBSCRIPTION_FAIL_MESSAGE);
     }
     client.punsubscribe();
     client.flush();
@@ -85,7 +85,7 @@ public abstract class JedisPubSub {
 
   public void punsubscribe(String... patterns) {
     if (client == null) {
-      throw new JedisConnectionException(JEDIS_SUBSCRIPTION_MESSAGE);
+      throw new JedisConnectionException(SUBSCRIPTION_FAIL_MESSAGE);
     }
     client.punsubscribe(patterns);
     client.flush();
@@ -93,7 +93,7 @@ public abstract class JedisPubSub {
 
   public void ping() {
     if (client == null) {
-      throw new JedisConnectionException(JEDIS_SUBSCRIPTION_MESSAGE);
+      throw new JedisConnectionException(SUBSCRIPTION_FAIL_MESSAGE);
     }
     client.ping();
     client.flush();
