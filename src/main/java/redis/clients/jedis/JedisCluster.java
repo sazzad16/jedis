@@ -27,37 +27,45 @@ public class JedisCluster extends BinaryJedisCluster implements JedisCommands,
     this(Collections.singleton(node));
   }
 
+  @Deprecated
   public JedisCluster(HostAndPort node, int timeout) {
     this(Collections.singleton(node), timeout);
   }
 
+  @Deprecated
   public JedisCluster(HostAndPort node, int timeout, int maxAttempts) {
     this(Collections.singleton(node), timeout, maxAttempts);
   }
 
+  @Deprecated
   public JedisCluster(HostAndPort node, final GenericObjectPoolConfig poolConfig) {
     this(Collections.singleton(node), poolConfig);
   }
 
+  @Deprecated
   public JedisCluster(HostAndPort node, int timeout, final GenericObjectPoolConfig poolConfig) {
     this(Collections.singleton(node), timeout, poolConfig);
   }
 
+  @Deprecated
   public JedisCluster(HostAndPort node, int timeout, int maxAttempts,
       final GenericObjectPoolConfig poolConfig) {
     this(Collections.singleton(node), timeout, maxAttempts, poolConfig);
   }
 
+  @Deprecated
   public JedisCluster(HostAndPort node, int connectionTimeout, int soTimeout,
       int maxAttempts, final GenericObjectPoolConfig poolConfig) {
     this(Collections.singleton(node), connectionTimeout, soTimeout, maxAttempts, poolConfig);
   }
 
+  @Deprecated
   public JedisCluster(HostAndPort node, int connectionTimeout, int soTimeout,
                       int maxAttempts, String password, final GenericObjectPoolConfig poolConfig) {
     this(Collections.singleton(node), connectionTimeout, soTimeout, maxAttempts, password, poolConfig);
   }
 
+  @Deprecated
   public JedisCluster(HostAndPort node, int connectionTimeout, int soTimeout,
           int maxAttempts, String password, String clientName, final GenericObjectPoolConfig poolConfig) {
     this(Collections.singleton(node), connectionTimeout, soTimeout, maxAttempts, password, clientName, poolConfig);
