@@ -15,8 +15,15 @@ import redis.clients.util.SafeEncoder;
 public final class BuilderFactory {
   public static final Builder<Double> DOUBLE = new Builder<Double>() {
     public Double build(Object data) {
-      String asString = STRING.build(data);
-      return asString == null ? null : Double.valueOf(asString);
+      String string = STRING.build(data);
+      if (string == null) return null;
+      try {
+        return Double.valueOf(string);
+      } catch (NumberFormatException e) {
+        if (string.equals("inf")) return Double.POSITIVE_INFINITY;
+        if (string.equals("-inf")) return Double.NEGATIVE_INFINITY;
+        throw e;
+      }
     }
 
     public String toString() {
@@ -239,8 +246,7 @@ public final class BuilderFactory {
       final Set<Tuple> result = new LinkedHashSet<Tuple>(l.size()/2, 1);
       Iterator<byte[]> iterator = l.iterator();
       while (iterator.hasNext()) {
-        result.add(new Tuple(SafeEncoder.encode(iterator.next()), Double.valueOf(SafeEncoder
-            .encode(iterator.next()))));
+        result.add(new Tuple(SafeEncoder.encode(iterator.next()), DOUBLE.build(iterator.next())));
       }
       return result;
     }
@@ -261,7 +267,7 @@ public final class BuilderFactory {
       final Set<Tuple> result = new LinkedHashSet<Tuple>(l.size()/2, 1);
       Iterator<byte[]> iterator = l.iterator();
       while (iterator.hasNext()) {
-        result.add(new Tuple(iterator.next(), Double.valueOf(SafeEncoder.encode(iterator.next()))));
+        result.add(new Tuple(iterator.next(), DOUBLE.build(iterator.next())));
       }
 
       return result;
@@ -349,9 +355,8 @@ public final class BuilderFactory {
           responseCoordinate.add(null);
         } else {
           List<Object> respList = (List<Object>) response;
-          GeoCoordinate coord = new GeoCoordinate(Double.parseDouble(SafeEncoder
-              .encode((byte[]) respList.get(0))), Double.parseDouble(SafeEncoder
-              .encode((byte[]) respList.get(1))));
+          GeoCoordinate coord = new GeoCoordinate(DOUBLE.build(respList.get(0)),
+              DOUBLE.build(respList.get(1)));
           responseCoordinate.add(coord);
         }
       }
@@ -387,11 +392,11 @@ public final class BuilderFactory {
                 // coordinate
                 List<Object> coord = (List<Object>) info;
 
-                resp.setCoordinate(new GeoCoordinate(convertByteArrayToDouble(coord.get(0)),
-                    convertByteArrayToDouble(coord.get(1))));
+                resp.setCoordinate(new GeoCoordinate(DOUBLE.build(coord.get(0)),
+                    DOUBLE.build(coord.get(1))));
               } else {
                 // distance
-                resp.setDistance(convertByteArrayToDouble(info));
+                resp.setDistance(DOUBLE.build(info));
               }
             }
 
@@ -406,10 +411,6 @@ public final class BuilderFactory {
 
         return responses;
       }
-    }
-
-    private Double convertByteArrayToDouble(Object obj) {
-      return Double.valueOf(SafeEncoder.encode((byte[]) obj));
     }
 
     public String toString() {
