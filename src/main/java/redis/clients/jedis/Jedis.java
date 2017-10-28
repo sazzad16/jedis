@@ -13,7 +13,6 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocketFactory;
 
-import redis.clients.jedis.BinaryClient.LIST_POSITION;
 import redis.clients.jedis.JedisCluster.Reset;
 import redis.clients.jedis.commands.AdvancedJedisCommands;
 import redis.clients.jedis.commands.ClusterCommands;
@@ -2610,7 +2609,7 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
   }
 
   @Override
-  public Long linsert(final String key, final LIST_POSITION where, final String pivot,
+  public Long linsert(final String key, final ListPosition where, final String pivot,
       final String value) {
     checkIsInMultiOrPipeline();
     client.linsert(key, where, pivot, value);
