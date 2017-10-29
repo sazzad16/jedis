@@ -495,8 +495,8 @@ public class Client extends BinaryClient implements Commands {
   }
 
   @Override
-  public void zrevrange(final String key, final long start, final long end) {
-    zrevrange(SafeEncoder.encode(key), start, end);
+  public void zrevrange(final String key, final long start, final long stop) {
+    zrevrange(SafeEncoder.encode(key), start, stop);
   }
 
   @Override
@@ -505,8 +505,8 @@ public class Client extends BinaryClient implements Commands {
   }
 
   @Override
-  public void zrevrangeWithScores(final String key, final long start, final long end) {
-    zrevrangeWithScores(SafeEncoder.encode(key), start, end);
+  public void zrevrangeWithScores(final String key, final long start, final long stop) {
+    zrevrangeWithScores(SafeEncoder.encode(key), start, stop);
   }
 
   @Override
