@@ -54,7 +54,7 @@ public interface BinaryJedisClusterCommands {
 
   String psetex(byte[] key, long milliseconds, byte[] value);
 
-  Long decrBy(byte[] key, long integer);
+  Long decrBy(byte[] key, long decrement);
 
   Long decr(byte[] key);
 
