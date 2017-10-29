@@ -150,7 +150,7 @@ public interface JedisCommands {
 
   Set<String> zrange(String key, long start, long stop);
 
-  Long zrem(String key, String... member);
+  Long zrem(String key, String... members);
 
   Double zincrby(String key, double increment, String member);
 
