@@ -143,7 +143,7 @@ public interface JedisClusterCommands {
 
   Long zadd(String key, Map<String, Double> scoreMembers, ZAddParams params);
 
-  Set<String> zrange(String key, long start, long end);
+  Set<String> zrange(String key, long start, long stop);
 
   Long zrem(String key, String... member);
 
@@ -157,7 +157,7 @@ public interface JedisClusterCommands {
 
   Set<String> zrevrange(String key, long start, long end);
 
-  Set<Tuple> zrangeWithScores(String key, long start, long end);
+  Set<Tuple> zrangeWithScores(String key, long start, long stop);
 
   Set<Tuple> zrevrangeWithScores(String key, long start, long end);
 

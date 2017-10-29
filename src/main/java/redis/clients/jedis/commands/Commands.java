@@ -169,7 +169,7 @@ public interface Commands {
 
   void zadd(String key, Map<String, Double> scoreMembers, ZAddParams params);
 
-  void zrange(String key, long start, long end);
+  void zrange(String key, long start, long stop);
 
   void zrem(String key, String... members);
 
@@ -183,7 +183,7 @@ public interface Commands {
 
   void zrevrange(String key, long start, long end);
 
-  void zrangeWithScores(String key, long start, long end);
+  void zrangeWithScores(String key, long start, long stop);
 
   void zrevrangeWithScores(String key, long start, long end);
 
