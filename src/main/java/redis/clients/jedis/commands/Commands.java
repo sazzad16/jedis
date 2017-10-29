@@ -218,6 +218,8 @@ public interface Commands {
   void zrangeByScore(String key, double min, double max, int offset,
       int count);
 
+  void zrangeByScore(String key, String min, String max, int offset, int count);
+
   void zrangeByScoreWithScores(String key, double min, double max);
 
   void zrangeByScoreWithScores(String key, double min, double max,
