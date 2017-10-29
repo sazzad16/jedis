@@ -1562,21 +1562,23 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
    * <p>
    * Time complexity O(log(N)) with N being the number of elements in the sorted set
    * @param key
-   * @param score
+   * @param increment
    * @param member
    * @return The new score
    */
   @Override
-  public Double zincrby(final String key, final double score, final String member) {
+  public Double zincrby(final String key, final double increment, final String member) {
     checkIsInMultiOrPipeline();
-    client.zincrby(key, score, member);
-    return BuilderFactory.DOUBLE.build(client.getOne());
+    client.zincrby(key, increment, member);
+    String newscore = client.getBulkReply();
+    return Double.valueOf(newscore);
   }
 
   @Override
-  public Double zincrby(final String key, final double score, final String member, final ZIncrByParams params) {
+  public Double zincrby(final String key, final double increment, final String member,
+      final ZIncrByParams params) {
     checkIsInMultiOrPipeline();
-    client.zincrby(key, score, member, params);
+    client.zincrby(key, increment, member, params);
     return BuilderFactory.DOUBLE.build(client.getOne());
   }
 

@@ -1761,21 +1761,22 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
    * <p>
    * Time complexity O(log(N)) with N being the number of elements in the sorted set
    * @param key
-   * @param score
+   * @param increment
    * @param member
    * @return The new score
    */
   @Override
-  public Double zincrby(final byte[] key, final double score, final byte[] member) {
+  public Double zincrby(final byte[] key, final double increment, final byte[] member) {
     checkIsInMultiOrPipeline();
-    client.zincrby(key, score, member);
-    return BuilderFactory.DOUBLE.build(client.getOne());
+    client.zincrby(key, increment, member);
+    String newscore = client.getBulkReply();
+    return Double.valueOf(newscore);
   }
 
   @Override
-  public Double zincrby(final byte[] key, final double score, final byte[] member, final ZIncrByParams params) {
+  public Double zincrby(byte[] key, double increment, byte[] member, ZIncrByParams params) {
     checkIsInMultiOrPipeline();
-    client.zincrby(key, score, member, params);
+    client.zincrby(key, increment, member, params);
     return BuilderFactory.DOUBLE.build(client.getOne());
   }
 
