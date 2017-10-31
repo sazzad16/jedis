@@ -19,7 +19,7 @@ public interface RedisPipeline {
 
   Response<Long> decr(String key);
 
-  Response<Long> decrBy(String key, long integer);
+  Response<Long> decrBy(String key, long decrement);
 
   Response<Long> del(String key);
 
@@ -77,7 +77,7 @@ public interface RedisPipeline {
 
   Response<Long> incr(String key);
 
-  Response<Long> incrBy(String key, long integer);
+  Response<Long> incrBy(String key, long increment);
 
   Response<String> lindex(String key, long index);
 
@@ -91,13 +91,13 @@ public interface RedisPipeline {
 
   Response<Long> lpushx(String key, String... string);
 
-  Response<List<String>> lrange(String key, long start, long end);
+  Response<List<String>> lrange(String key, long start, long stop);
 
   Response<Long> lrem(String key, long count, String value);
 
   Response<String> lset(String key, long index, String value);
 
-  Response<String> ltrim(String key, long start, long end);
+  Response<String> ltrim(String key, long start, long stop);
 
   Response<Long> move(String key, int dbIndex);
 
@@ -169,11 +169,11 @@ public interface RedisPipeline {
 
   Response<Long> zcount(String key, String min, String max);
 
-  Response<Double> zincrby(String key, double score, String member);
+  Response<Double> zincrby(String key, double increment, String member);
 
-  Response<Double> zincrby(String key, double score, String member, ZIncrByParams params);
+  Response<Double> zincrby(String key, double increment, String member, ZIncrByParams params);
 
-  Response<Set<String>> zrange(String key, long start, long end);
+  Response<Set<String>> zrange(String key, long start, long stop);
 
   Response<Set<String>> zrangeByScore(String key, double min, double max);
 
@@ -211,21 +211,21 @@ public interface RedisPipeline {
   Response<Set<Tuple>> zrevrangeByScoreWithScores(String key, String max, String min, int offset,
       int count);
 
-  Response<Set<Tuple>> zrangeWithScores(String key, long start, long end);
+  Response<Set<Tuple>> zrangeWithScores(String key, long start, long stop);
 
   Response<Long> zrank(String key, String member);
 
-  Response<Long> zrem(String key, String... member);
+  Response<Long> zrem(String key, String... members);
 
-  Response<Long> zremrangeByRank(String key, long start, long end);
+  Response<Long> zremrangeByRank(String key, long start, long stop);
 
-  Response<Long> zremrangeByScore(String key, double start, double end);
+  Response<Long> zremrangeByScore(String key, double min, double max);
 
-  Response<Long> zremrangeByScore(String key, String start, String end);
+  Response<Long> zremrangeByScore(String key, String min, String max);
 
-  Response<Set<String>> zrevrange(String key, long start, long end);
+  Response<Set<String>> zrevrange(String key, long start, long stop);
 
-  Response<Set<Tuple>> zrevrangeWithScores(String key, long start, long end);
+  Response<Set<Tuple>> zrevrangeWithScores(String key, long start, long stop);
 
   Response<Long> zrevrank(String key, String member);
 
@@ -243,7 +243,7 @@ public interface RedisPipeline {
   Response<Set<String>> zrevrangeByLex(String key, String max, String min,
       int offset, int count);
 
-  Response<Long> zremrangeByLex(String key, String start, String end);
+  Response<Long> zremrangeByLex(String key, String min, String max);
 
   Response<Long> bitcount(String key);
 
