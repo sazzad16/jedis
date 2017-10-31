@@ -361,12 +361,30 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
     return getResponse(BuilderFactory.BYTE_ARRAY);
   }
 
+  /**
+   * @deprecated Use {@link #linsert(java.lang.String, redis.clients.jedis.ListPosition, java.lang.String, java.lang.String) 
+   */
   public Response<Long> linsert(String key, LIST_POSITION where, String pivot, String value) {
     getClient(key).linsert(key, where, pivot, value);
     return getResponse(BuilderFactory.LONG);
   }
 
+  @Override
+  public Response<Long> linsert(final String key, final ListPosition where, final String pivot, final String value) {
+    getClient(key).linsert(key, where, pivot, value);
+    return getResponse(BuilderFactory.LONG);
+  }
+
+  /**
+   * @deprecated Use {@link #linsert(byte[], redis.clients.jedis.ListPosition, byte[], byte[]) 
+   */
   public Response<Long> linsert(byte[] key, LIST_POSITION where, byte[] pivot, byte[] value) {
+    getClient(key).linsert(key, where, pivot, value);
+    return getResponse(BuilderFactory.LONG);
+  }
+
+  @Override
+  public Response<Long> linsert(final byte[] key, final ListPosition where, final byte[] pivot, final byte[] value) {
     getClient(key).linsert(key, where, pivot, value);
     return getResponse(BuilderFactory.LONG);
   }

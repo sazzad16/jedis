@@ -26,6 +26,9 @@ import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocketFactory;
 
 public class BinaryClient extends Connection {
+  /**
+   * @deprecated Use {@link ListPosition}
+   */
   public enum LIST_POSITION {
     BEFORE, AFTER;
     public final byte[] raw;
@@ -925,7 +928,15 @@ public class BinaryClient extends Connection {
     sendCommand(ECHO, string);
   }
 
+  /**
+   * @deprecated Use {@link #linsert(byte[], redis.clients.jedis.ListPosition, byte[], byte[]) 
+   */
   public void linsert(final byte[] key, final LIST_POSITION where, final byte[] pivot,
+      final byte[] value) {
+    sendCommand(LINSERT, key, where.raw, pivot, value);
+  }
+
+  public void linsert(final byte[] key, final ListPosition where, final byte[] pivot,
       final byte[] value) {
     sendCommand(LINSERT, key, where.raw, pivot, value);
   }

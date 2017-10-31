@@ -1,6 +1,5 @@
 package redis.clients.jedis;
 
-import redis.clients.jedis.BinaryClient.LIST_POSITION;
 import redis.clients.jedis.params.sortedset.ZAddParams;
 import redis.clients.jedis.params.sortedset.ZIncrByParams;
 
@@ -263,8 +262,7 @@ public interface Commands {
 
   public void echo(final String string);
 
-  public void linsert(final String key, final LIST_POSITION where, final String pivot,
-      final String value);
+  void linsert(String key, ListPosition where, String pivot, String value);
 
   public void bgrewriteaof();
 

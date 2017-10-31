@@ -3098,7 +3098,19 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
     return client.getBinaryBulkReply();
   }
 
+  /**
+   * @deprecated Use {@link #linsert(byte[], redis.clients.jedis.ListPosition, byte[], byte[]) 
+   */
+  @Override
   public Long linsert(final byte[] key, final LIST_POSITION where, final byte[] pivot,
+      final byte[] value) {
+    checkIsInMultiOrPipeline();
+    client.linsert(key, where, pivot, value);
+    return client.getIntegerReply();
+  }
+
+  @Override
+  public Long linsert(final byte[] key, final ListPosition where, final byte[] pivot,
       final byte[] value) {
     checkIsInMultiOrPipeline();
     client.linsert(key, where, pivot, value);

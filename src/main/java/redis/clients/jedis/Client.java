@@ -701,7 +701,16 @@ public class Client extends BinaryClient implements Commands {
     echo(SafeEncoder.encode(string));
   }
 
+  /**
+   * @deprecated Use {@link #linsert(java.lang.String, redis.clients.jedis.ListPosition, java.lang.String, java.lang.String) 
+   */
   public void linsert(final String key, final LIST_POSITION where, final String pivot,
+      final String value) {
+    linsert(SafeEncoder.encode(key), where, SafeEncoder.encode(pivot), SafeEncoder.encode(value));
+  }
+
+  @Override
+  public void linsert(final String key, final ListPosition where, final String pivot,
       final String value) {
     linsert(SafeEncoder.encode(key), where, SafeEncoder.encode(pivot), SafeEncoder.encode(value));
   }

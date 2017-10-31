@@ -649,7 +649,16 @@ public class ShardedJedis extends BinaryShardedJedis implements JedisCommands, C
     return getShard(key).zremrangeByLex(key, min, max);
   }
 
+  /**
+   * @deprecated Use {@link #linsert(java.lang.String, redis.clients.jedis.ListPosition, java.lang.String, java.lang.String) 
+   */
   public Long linsert(String key, LIST_POSITION where, String pivot, String value) {
+    Jedis j = getShard(key);
+    return j.linsert(key, where, pivot, value);
+  }
+
+  @Override
+  public Long linsert(final String key, final ListPosition where, final String pivot, final String value) {
     Jedis j = getShard(key);
     return j.linsert(key, where, pivot, value);
   }

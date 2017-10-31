@@ -1093,8 +1093,22 @@ public class BinaryJedisCluster implements BasicCommands, BinaryJedisClusterComm
     }.runBinary(key);
   }
 
+  /**
+   * @deprecated Use {@link #linsert(byte[], redis.clients.jedis.ListPosition, byte[], byte[]) 
+   */
   @Override
   public Long linsert(final byte[] key, final Client.LIST_POSITION where, final byte[] pivot,
+      final byte[] value) {
+    return new JedisClusterCommand<Long>(connectionHandler, maxAttempts) {
+      @Override
+      public Long execute(Jedis connection) {
+        return connection.linsert(key, where, pivot, value);
+      }
+    }.runBinary(key);
+  }
+
+  @Override
+  public Long linsert(final byte[] key, final ListPosition where, final byte[] pivot,
       final byte[] value) {
     return new JedisClusterCommand<Long>(connectionHandler, maxAttempts) {
       @Override
