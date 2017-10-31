@@ -1004,8 +1004,15 @@ public class Client extends BinaryClient implements Commands {
     cluster(Protocol.CLUSTER_MEET, ip, String.valueOf(port));
   }
 
+  /**
+   * @deprecated Use {@link #clusterReset(redis.clients.jedis.ClusterReset) 
+   */
   public void clusterReset(final Reset resetType) {
     cluster(Protocol.CLUSTER_RESET, resetType.toString());
+  }
+
+  public void clusterReset(final ClusterReset resetType) {
+    cluster(Protocol.CLUSTER_RESET, resetType.name());
   }
 
   public void clusterAddSlots(final int... slots) {

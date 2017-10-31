@@ -18,6 +18,9 @@ import redis.clients.util.JedisClusterHashTagUtil;
 public class JedisCluster extends BinaryJedisCluster implements JedisCommands,
     MultiKeyJedisClusterCommands, JedisClusterScriptingCommands {
 
+  /**
+   * @deprecated Use {@link ClusterReset}
+   */
   public static enum Reset {
     SOFT, HARD
   }
