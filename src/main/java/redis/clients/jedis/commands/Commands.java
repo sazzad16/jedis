@@ -115,7 +115,7 @@ public interface Commands {
 
   void llen(String key);
 
-  void lrange(String key, long start, long end);
+  void lrange(String key, long start, long stop);
 
   void ltrim(String key, long start, long end);
 
