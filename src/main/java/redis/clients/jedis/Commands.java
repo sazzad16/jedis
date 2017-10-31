@@ -206,39 +206,38 @@ public interface Commands {
 
   public void zcount(final String key, final String min, final String max);
 
-  public void zrangeByScore(final String key, final double min, final double max);
+  void zrangeByScore(String key, double min, double max);
 
-  public void zrangeByScore(final String key, final String min, final String max);
+  void zrangeByScore(String key, String min, String max);
 
-  public void zrangeByScore(final String key, final double min, final double max, final int offset,
+  void zrangeByScore(String key, double min, double max, int offset,
       int count);
 
-  public void zrangeByScoreWithScores(final String key, final double min, final double max);
+  void zrangeByScore(String key, String min, String max, int offset, int count);
 
-  public void zrangeByScoreWithScores(final String key, final double min, final double max,
-      final int offset, final int count);
+  void zrangeByScoreWithScores(String key, double min, double max);
 
-  public void zrangeByScoreWithScores(final String key, final String min, final String max);
+  void zrangeByScoreWithScores(String key, double min, double max, int offset, int count);
 
-  public void zrangeByScoreWithScores(final String key, final String min, final String max,
-      final int offset, final int count);
+  void zrangeByScoreWithScores(String key, String min, String max);
 
-  public void zrevrangeByScore(final String key, final double max, final double min);
+  void zrangeByScoreWithScores(String key, String min, String max, int offset, int count);
 
-  public void zrevrangeByScore(final String key, final String max, final String min);
+  void zrevrangeByScore(String key, double max, double min);
 
-  public void zrevrangeByScore(final String key, final double max, final double min,
-      final int offset, int count);
+  void zrevrangeByScore(String key, String max, String min);
 
-  public void zrevrangeByScoreWithScores(final String key, final double max, final double min);
+  void zrevrangeByScore(String key, double max, double min, int offset, int count);
 
-  public void zrevrangeByScoreWithScores(final String key, final double max, final double min,
-      final int offset, final int count);
+  void zrevrangeByScore(String key, String max, String min, int offset, int count);
 
-  public void zrevrangeByScoreWithScores(final String key, final String max, final String min);
+  void zrevrangeByScoreWithScores(String key, double max, double min);
 
-  public void zrevrangeByScoreWithScores(final String key, final String max, final String min,
-      final int offset, final int count);
+  void zrevrangeByScoreWithScores(String key, double max, double min, int offset, int count);
+
+  void zrevrangeByScoreWithScores(String key, String max, String min);
+
+  void zrevrangeByScoreWithScores(String key, String max, String min, int offset, int count);
 
   public void zremrangeByRank(final String key, final long start, final long end);
 

@@ -760,12 +760,13 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
    * @see #decr(byte[])
    * @see #incrBy(byte[], long)
    * @param key
-   * @param integer
+   * @param decrement
    * @return Integer reply, this commands will reply with the new value of key after the increment.
    */
-  public Long decrBy(final byte[] key, final long integer) {
+  @Override
+  public Long decrBy(final byte[] key, final long decrement) {
     checkIsInMultiOrPipeline();
-    client.decrBy(key, integer);
+    client.decrBy(key, decrement);
     return client.getIntegerReply();
   }
 
@@ -807,12 +808,13 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
    * @see #decr(byte[])
    * @see #decrBy(byte[], long)
    * @param key
-   * @param integer
+   * @param increment
    * @return Integer reply, this commands will reply with the new value of key after the increment.
    */
-  public Long incrBy(final byte[] key, final long integer) {
+  @Override
+  public Long incrBy(final byte[] key, final long increment) {
     checkIsInMultiOrPipeline();
-    client.incrBy(key, integer);
+    client.incrBy(key, increment);
     return client.getIntegerReply();
   }
 
@@ -832,12 +834,13 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
    * @see #decr(byte[])
    * @see #decrBy(byte[], long)
    * @param key the key to increment
-   * @param integer the value to increment by
+   * @param increment the value to increment by
    * @return Integer reply, this commands will reply with the new value of key after the increment.
    */
-  public Double incrByFloat(final byte[] key, final double integer) {
+  @Override
+  public Double incrByFloat(final byte[] key, final double increment) {
     checkIsInMultiOrPipeline();
-    client.incrByFloat(key, integer);
+    client.incrByFloat(key, increment);
     String dval = client.getBulkReply();
     return (dval != null ? new Double(dval) : null);
   }
@@ -1206,12 +1209,13 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
    * offset)
    * @param key
    * @param start
-   * @param end
+   * @param stop
    * @return Multi bulk reply, specifically a list of elements in the specified range.
    */
-  public List<byte[]> lrange(final byte[] key, final long start, final long end) {
+  @Override
+  public List<byte[]> lrange(final byte[] key, final long start, final long stop) {
     checkIsInMultiOrPipeline();
-    client.lrange(key, start, end);
+    client.lrange(key, start, stop);
     return client.getBinaryMultiBulkReply();
   }
 
@@ -1242,12 +1246,13 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
    * Time complexity: O(n) (with n being len of list - len of range)
    * @param key
    * @param start
-   * @param end
+   * @param stop
    * @return Status code reply
    */
-  public String ltrim(final byte[] key, final long start, final long end) {
+  @Override
+  public String ltrim(final byte[] key, final long start, final long stop) {
     checkIsInMultiOrPipeline();
-    client.ltrim(key, start, end);
+    client.ltrim(key, start, stop);
     return client.getStatusCodeReply();
   }
 
@@ -1671,9 +1676,9 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   }
 
   @Override
-  public Set<byte[]> zrange(final byte[] key, final long start, final long end) {
+  public Set<byte[]> zrange(final byte[] key, final long start, final long stop) {
     checkIsInMultiOrPipeline();
-    client.zrange(key, start, end);
+    client.zrange(key, start, stop);
     return SetFromList.of(client.getBinaryMultiBulkReply());
   }
 
@@ -1708,20 +1713,22 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
    * <p>
    * Time complexity O(log(N)) with N being the number of elements in the sorted set
    * @param key
-   * @param score
+   * @param increment
    * @param member
    * @return The new score
    */
-  public Double zincrby(final byte[] key, final double score, final byte[] member) {
+  @Override
+  public Double zincrby(final byte[] key, final double increment, final byte[] member) {
     checkIsInMultiOrPipeline();
-    client.zincrby(key, score, member);
-    return BuilderFactory.DOUBLE.build(client.getOne());
+    client.zincrby(key, increment, member);
+    String newscore = client.getBulkReply();
+    return Double.valueOf(newscore);
   }
 
   @Override
-  public Double zincrby(final byte[] key, final double score, final byte[] member, final ZIncrByParams params) {
+  public Double zincrby(byte[] key, double increment, byte[] member, ZIncrByParams params) {
     checkIsInMultiOrPipeline();
-    client.zincrby(key, score, member, params);
+    client.zincrby(key, increment, member, params);
     return BuilderFactory.DOUBLE.build(client.getOne());
   }
 
@@ -1769,21 +1776,24 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
     return client.getIntegerReply();
   }
 
-  public Set<byte[]> zrevrange(final byte[] key, final long start, final long end) {
+  @Override
+  public Set<byte[]> zrevrange(final byte[] key, final long start, final long stop) {
     checkIsInMultiOrPipeline();
-    client.zrevrange(key, start, end);
+    client.zrevrange(key, start, stop);
     return SetFromList.of(client.getBinaryMultiBulkReply());
   }
 
-  public Set<Tuple> zrangeWithScores(final byte[] key, final long start, final long end) {
+  @Override
+  public Set<Tuple> zrangeWithScores(final byte[] key, final long start, final long stop) {
     checkIsInMultiOrPipeline();
-    client.zrangeWithScores(key, start, end);
+    client.zrangeWithScores(key, start, stop);
     return getTupledSet();
   }
 
-  public Set<Tuple> zrevrangeWithScores(final byte[] key, final long start, final long end) {
+  @Override
+  public Set<Tuple> zrevrangeWithScores(final byte[] key, final long start, final long stop) {
     checkIsInMultiOrPipeline();
-    client.zrevrangeWithScores(key, start, end);
+    client.zrevrangeWithScores(key, start, stop);
     return getTupledSet();
   }
 
@@ -2567,9 +2577,10 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
    * <b>Time complexity:</b> O(log(N))+O(M) with N being the number of elements in the sorted set
    * and M the number of elements removed by the operation
    */
-  public Long zremrangeByRank(final byte[] key, final long start, final long end) {
+  @Override
+  public Long zremrangeByRank(final byte[] key, final long start, final long stop) {
     checkIsInMultiOrPipeline();
-    client.zremrangeByRank(key, start, end);
+    client.zremrangeByRank(key, start, stop);
     return client.getIntegerReply();
   }
 
@@ -2582,19 +2593,21 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
    * O(log(N))+O(M) with N being the number of elements in the sorted set and M the number of
    * elements removed by the operation
    * @param key
-   * @param start
-   * @param end
+   * @param min
+   * @param max
    * @return Integer reply, specifically the number of elements removed.
    */
-  public Long zremrangeByScore(final byte[] key, final double start, final double end) {
+  @Override
+  public Long zremrangeByScore(final byte[] key, final double min, final double max) {
     checkIsInMultiOrPipeline();
-    client.zremrangeByScore(key, start, end);
+    client.zremrangeByScore(key, min, max);
     return client.getIntegerReply();
   }
 
-  public Long zremrangeByScore(final byte[] key, final byte[] start, final byte[] end) {
+  @Override
+  public Long zremrangeByScore(final byte[] key, final byte[] min, final byte[] max) {
     checkIsInMultiOrPipeline();
-    client.zremrangeByScore(key, start, end);
+    client.zremrangeByScore(key, min, max);
     return client.getIntegerReply();
   }
 

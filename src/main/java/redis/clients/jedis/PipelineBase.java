@@ -65,13 +65,15 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
     return getResponse(BuilderFactory.LONG);
   }
 
-  public Response<Long> decrBy(String key, long integer) {
-    getClient(key).decrBy(key, integer);
+  @Override
+  public Response<Long> decrBy(final String key, final long decrement) {
+    getClient(key).decrBy(key, decrement);
     return getResponse(BuilderFactory.LONG);
   }
 
-  public Response<Long> decrBy(byte[] key, long integer) {
-    getClient(key).decrBy(key, integer);
+  @Override
+  public Response<Long> decrBy(final byte[] key, final long decrement) {
+    getClient(key).decrBy(key, decrement);
     return getResponse(BuilderFactory.LONG);
   }
 
@@ -337,13 +339,15 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
     return getResponse(BuilderFactory.LONG);
   }
 
-  public Response<Long> incrBy(String key, long integer) {
-    getClient(key).incrBy(key, integer);
+  @Override
+  public Response<Long> incrBy(final String key, final long increment) {
+    getClient(key).incrBy(key, increment);
     return getResponse(BuilderFactory.LONG);
   }
 
-  public Response<Long> incrBy(byte[] key, long integer) {
-    getClient(key).incrBy(key, integer);
+  @Override
+  public Response<Long> incrBy(final byte[] key, final long increment) {
+    getClient(key).incrBy(key, increment);
     return getResponse(BuilderFactory.LONG);
   }
 
@@ -407,13 +411,15 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
     return getResponse(BuilderFactory.LONG);
   }
 
-  public Response<List<String>> lrange(String key, long start, long end) {
-    getClient(key).lrange(key, start, end);
+  @Override
+  public Response<List<String>> lrange(final String key, final long start, final long stop) {
+    getClient(key).lrange(key, start, stop);
     return getResponse(BuilderFactory.STRING_LIST);
   }
 
-  public Response<List<byte[]>> lrange(byte[] key, long start, long end) {
-    getClient(key).lrange(key, start, end);
+  @Override
+  public Response<List<byte[]>> lrange(final byte[] key, final long start, final long stop) {
+    getClient(key).lrange(key, start, stop);
     return getResponse(BuilderFactory.BYTE_ARRAY_LIST);
   }
 
@@ -437,13 +443,15 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
     return getResponse(BuilderFactory.STRING);
   }
 
-  public Response<String> ltrim(String key, long start, long end) {
-    getClient(key).ltrim(key, start, end);
+  @Override
+  public Response<String> ltrim(final String key, final long start, final long stop) {
+    getClient(key).ltrim(key, start, stop);
     return getResponse(BuilderFactory.STRING);
   }
 
-  public Response<String> ltrim(byte[] key, long start, long end) {
-    getClient(key).ltrim(key, start, end);
+  @Override
+  public Response<String> ltrim(final byte[] key, final long start, final long stop) {
+    getClient(key).ltrim(key, start, stop);
     return getResponse(BuilderFactory.STRING);
   }
 
@@ -790,37 +798,39 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
     return getResponse(BuilderFactory.LONG);
   }
 
-  public Response<Double> zincrby(String key, double score, String member) {
-    getClient(key).zincrby(key, score, member);
+  @Override
+  public Response<Double> zincrby(final String key, final double increment, final String member) {
+    getClient(key).zincrby(key, increment, member);
     return getResponse(BuilderFactory.DOUBLE);
   }
 
   @Override
-  public Response<Double> zincrby(String key, double score, String member, ZIncrByParams params) {
-    getClient(key).zincrby(key, score, member, params);
+  public Response<Double> zincrby(final String key, final double increment, final String member, ZIncrByParams params) {
+    getClient(key).zincrby(key, increment, member, params);
     return getResponse(BuilderFactory.DOUBLE);
   }
 
   @Override
-  public Response<Double> zincrby(byte[] key, double score, byte[] member) {
-    getClient(key).zincrby(key, score, member);
+  public Response<Double> zincrby(final byte[] key, final double increment, final byte[] member) {
+    getClient(key).zincrby(key, increment, member);
     return getResponse(BuilderFactory.DOUBLE);
   }
 
   @Override
-  public Response<Double> zincrby(byte[] key, double score, byte[] member, ZIncrByParams params) {
-    getClient(key).zincrby(key, score, member);
+  public Response<Double> zincrby(final byte[] key, final double increment, final byte[] member, ZIncrByParams params) {
+    getClient(key).zincrby(key, increment, member);
     return getResponse(BuilderFactory.DOUBLE);
   }
 
   @Override
-  public Response<Set<String>> zrange(String key, long start, long end) {
-    getClient(key).zrange(key, start, end);
+  public Response<Set<String>> zrange(final String key, final long start, final long stop) {
+    getClient(key).zrange(key, start, stop);
     return getResponse(BuilderFactory.STRING_ZSET);
   }
 
-  public Response<Set<byte[]>> zrange(byte[] key, long start, long end) {
-    getClient(key).zrange(key, start, end);
+  @Override
+  public Response<Set<byte[]>> zrange(final byte[] key, final long start, final long stop) {
+    getClient(key).zrange(key, start, stop);
     return getResponse(BuilderFactory.BYTE_ARRAY_ZSET);
   }
 
@@ -878,8 +888,10 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
     return getResponse(BuilderFactory.TUPLE_ZSET);
   }
 
+  @Override
   public Response<Set<Tuple>> zrangeByScoreWithScores(byte[] key, double min, double max) {
-    return zrangeByScoreWithScores(key, toByteArray(min), toByteArray(max));
+    getClient(key).zrangeByScoreWithScores(key, min, max);
+    return getResponse(BuilderFactory.TUPLE_ZSET);
   }
 
   public Response<Set<Tuple>> zrangeByScoreWithScores(byte[] key, byte[] min, byte[] max) {
@@ -1004,13 +1016,15 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
     return getResponse(BuilderFactory.TUPLE_ZSET);
   }
 
-  public Response<Set<Tuple>> zrangeWithScores(String key, long start, long end) {
-    getClient(key).zrangeWithScores(key, start, end);
+  @Override
+  public Response<Set<Tuple>> zrangeWithScores(final String key, final long start, final long stop) {
+    getClient(key).zrangeWithScores(key, start, stop);
     return getResponse(BuilderFactory.TUPLE_ZSET);
   }
 
-  public Response<Set<Tuple>> zrangeWithScores(byte[] key, long start, long end) {
-    getClient(key).zrangeWithScores(key, start, end);
+  @Override
+  public Response<Set<Tuple>> zrangeWithScores(final byte[] key, final long start, final long stop) {
+    getClient(key).zrangeWithScores(key, start, stop);
     return getResponse(BuilderFactory.TUPLE_ZSET);
   }
 
@@ -1024,64 +1038,75 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
     return getResponse(BuilderFactory.LONG);
   }
 
-  public Response<Long> zrem(String key, String... member) {
-    getClient(key).zrem(key, member);
-    return getResponse(BuilderFactory.LONG);
-  }
-
-  public Response<Long> zrem(byte[] key, byte[]... member) {
-    getClient(key).zrem(key, member);
-    return getResponse(BuilderFactory.LONG);
-  }
-
-  public Response<Long> zremrangeByRank(String key, long start, long end) {
-    getClient(key).zremrangeByRank(key, start, end);
-    return getResponse(BuilderFactory.LONG);
-  }
-
-  public Response<Long> zremrangeByRank(byte[] key, long start, long end) {
-    getClient(key).zremrangeByRank(key, start, end);
-    return getResponse(BuilderFactory.LONG);
-  }
-
-  public Response<Long> zremrangeByScore(String key, double start, double end) {
-    getClient(key).zremrangeByScore(key, start, end);
+  @Override
+  public Response<Long> zrem(final String key, final String... members) {
+    getClient(key).zrem(key, members);
     return getResponse(BuilderFactory.LONG);
   }
 
   @Override
-  public Response<Long> zremrangeByScore(final String key, final String start, final String end) {
-    getClient(key).zremrangeByScore(key, start, end);
+  public Response<Long> zrem(final byte[] key, final byte[]... members) {
+    getClient(key).zrem(key, members);
     return getResponse(BuilderFactory.LONG);
   }
 
-  public Response<Long> zremrangeByScore(byte[] key, double start, double end) {
-    getClient(key).zremrangeByScore(key, toByteArray(start), toByteArray(end));
+  @Override
+  public Response<Long> zremrangeByRank(final String key, final long start, final long stop) {
+    getClient(key).zremrangeByRank(key, start, stop);
     return getResponse(BuilderFactory.LONG);
   }
 
-  public Response<Long> zremrangeByScore(byte[] key, byte[] start, byte[] end) {
-    getClient(key).zremrangeByScore(key, start, end);
+  @Override
+  public Response<Long> zremrangeByRank(final byte[] key, final long start, final long stop) {
+    getClient(key).zremrangeByRank(key, start, stop);
     return getResponse(BuilderFactory.LONG);
   }
 
-  public Response<Set<String>> zrevrange(String key, long start, long end) {
-    getClient(key).zrevrange(key, start, end);
+  @Override
+  public Response<Long> zremrangeByScore(final String key, final double min, final double max) {
+    getClient(key).zremrangeByScore(key, min, max);
+    return getResponse(BuilderFactory.LONG);
+  }
+
+  @Override
+  public Response<Long> zremrangeByScore(final String key, final String min, final String max) {
+    getClient(key).zremrangeByScore(key, min, max);
+    return getResponse(BuilderFactory.LONG);
+  }
+
+  @Override
+  public Response<Long> zremrangeByScore(final byte[] key, final double min, final double max) {
+    getClient(key).zremrangeByScore(key, toByteArray(min), toByteArray(max));
+    return getResponse(BuilderFactory.LONG);
+  }
+
+  @Override
+  public Response<Long> zremrangeByScore(final byte[] key, final byte[] min, final byte[] max) {
+    getClient(key).zremrangeByScore(key, min, max);
+    return getResponse(BuilderFactory.LONG);
+  }
+
+  @Override
+  public Response<Set<String>> zrevrange(final String key, final long start, final long stop) {
+    getClient(key).zrevrange(key, start, stop);
     return getResponse(BuilderFactory.STRING_ZSET);
   }
 
-  public Response<Set<byte[]>> zrevrange(byte[] key, long start, long end) {
-    getClient(key).zrevrange(key, start, end);
+  @Override
+  public Response<Set<byte[]>> zrevrange(final byte[] key, final long start, final long stop) {
+    getClient(key).zrevrange(key, start, stop);
     return getResponse(BuilderFactory.BYTE_ARRAY_ZSET);
   }
 
-  public Response<Set<Tuple>> zrevrangeWithScores(String key, long start, long end) {
-    getClient(key).zrevrangeWithScores(key, start, end);
+  @Override
+  public Response<Set<Tuple>> zrevrangeWithScores(final String key, final long start, final long stop) {
+    getClient(key).zrevrangeWithScores(key, start, stop);
     return getResponse(BuilderFactory.TUPLE_ZSET);
   }
 
-  public Response<Set<Tuple>> zrevrangeWithScores(byte[] key, long start, long end) {
-    getClient(key).zrevrangeWithScores(key, start, end);
+  @Override
+  public Response<Set<Tuple>> zrevrangeWithScores(final byte[] key, final long start, final long stop) {
+    getClient(key).zrevrangeWithScores(key, start, stop);
     return getResponse(BuilderFactory.TUPLE_ZSET);
   }
 
