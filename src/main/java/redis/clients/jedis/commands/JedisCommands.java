@@ -108,7 +108,7 @@ public interface JedisCommands {
 
   List<String> lrange(String key, long start, long stop);
 
-  String ltrim(String key, long start, long end);
+  String ltrim(String key, long start, long stop);
 
   String lindex(String key, long index);
 
