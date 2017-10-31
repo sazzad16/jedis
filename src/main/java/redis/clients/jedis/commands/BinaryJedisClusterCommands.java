@@ -60,7 +60,7 @@ public interface BinaryJedisClusterCommands {
 
   Long incrBy(byte[] key, long increment);
 
-  Double incrByFloat(byte[] key, double value);
+  Double incrByFloat(byte[] key, double increment);
 
   Long incr(byte[] key);
 
