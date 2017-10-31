@@ -13,7 +13,6 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocketFactory;
 
-import redis.clients.jedis.JedisCluster.Reset;
 import redis.clients.jedis.commands.AdvancedJedisCommands;
 import redis.clients.jedis.commands.ClusterCommands;
 import redis.clients.jedis.commands.JedisCommands;
@@ -3267,7 +3266,7 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
   }
 
   @Override
-  public String clusterReset(final Reset resetType) {
+  public String clusterReset(final ClusterReset resetType) {
     checkIsInMultiOrPipeline();
     client.clusterReset(resetType);
     return client.getStatusCodeReply();
