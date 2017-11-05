@@ -3154,7 +3154,7 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   }
 
   public Object evalsha(byte[] sha1) {
-    return evalsha(sha1, 1);
+    return evalsha(sha1, 0);
   }
 
   public Object evalsha(byte[] sha1, List<byte[]> keys, List<byte[]> args) {
