@@ -22,6 +22,7 @@ import javax.net.ssl.X509TrustManager;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import redis.clients.jedis.Jedis;
@@ -29,6 +30,7 @@ import redis.clients.jedis.JedisShardInfo;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.tests.commands.JedisCommandTestBase;
 
+@Ignore
 public class SSLJedisTest extends JedisCommandTestBase {
 
   @BeforeClass
