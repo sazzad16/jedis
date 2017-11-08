@@ -1,3 +1,6 @@
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.sazzad16/jedis.svg)](http://search.maven.org/#search%7Cgv%7C1%7Cg%3A%22com.github.sazzad16%22%20AND%20a%3A%22jedis%22)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE.txt)
+
 # Jedis
 
 This is a fork of [xetorthio/jedis](https://github.com/xetorthio/jedis), a java client for [antirez/redis](https://github.com/antirez/redis).
@@ -14,8 +17,6 @@ Or use it as a maven dependency:
     <groupId>com.github.sazzad16</groupId>
     <artifactId>jedis</artifactId>
     <version>2.9.2</version>
-    <type>jar</type>
-    <scope>compile</scope>
 </dependency>
 ```
 
