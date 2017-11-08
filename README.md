@@ -1,4 +1,4 @@
-[![Maven Central](https://img.shields.io/maven-central/v/com.github.sazzad16/jedis.svg)](http://mvnrepository.com/artifact/com.github.sazzad16/jedis)
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.sazzad16/jedis.svg)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.github.sazzad16%22%20AND%20a%3A%22jedis%22)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE.txt)
 
 # Jedis
