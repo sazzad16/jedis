@@ -1036,7 +1036,7 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
   }
 
   @Override
-  public Response<Set<Tuple>> zrangeByScoreWithScores(byte[] key, double min, double max) {
+  public Response<Set<Tuple>> zrangeByScoreWithScores(final byte[] key, final double min, final double max) {
     getClient(key).zrangeByScoreWithScores(key, min, max);
     return getResponse(BuilderFactory.TUPLE_ZSET);
   }

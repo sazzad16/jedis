@@ -1773,7 +1773,7 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   }
 
   @Override
-  public Double zincrby(byte[] key, double increment, byte[] member, ZIncrByParams params) {
+  public Double zincrby(final byte[] key, final double increment, final byte[] member, final ZIncrByParams params) {
     checkIsInMultiOrPipeline();
     client.zincrby(key, increment, member, params);
     return BuilderFactory.DOUBLE.build(client.getOne());
@@ -3360,7 +3360,7 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   }
 
   @Override
-  public List<Long> scriptExists(byte[]... sha1) {
+  public List<Long> scriptExists(final byte[]... sha1) {
     client.scriptExists(sha1);
     return client.getIntegerMultiBulkReply();
   }
