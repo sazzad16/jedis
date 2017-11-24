@@ -269,6 +269,7 @@ public class JedisShardInfo extends ShardInfo<Jedis> {
     this.soTimeout = soTimeout;
   }
 
+  @Override
   public String getName() {
     return name;
   }

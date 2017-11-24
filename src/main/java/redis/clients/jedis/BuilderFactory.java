@@ -14,6 +14,7 @@ import redis.clients.util.SafeEncoder;
 
 public final class BuilderFactory {
   public static final Builder<Double> DOUBLE = new Builder<Double>() {
+    @Override
     public Double build(Object data) {
       String string = STRING.build(data);
       if (string == null) return null;
@@ -32,6 +33,7 @@ public final class BuilderFactory {
     }
   };
   public static final Builder<Boolean> BOOLEAN = new Builder<Boolean>() {
+    @Override
     public Boolean build(Object data) {
       return ((Long) data) == 1;
     }
@@ -42,6 +44,7 @@ public final class BuilderFactory {
     }
   };
   public static final Builder<byte[]> BYTE_ARRAY = new Builder<byte[]>() {
+    @Override
     public byte[] build(Object data) {
       return ((byte[]) data); // deleted == 1
     }
@@ -53,6 +56,7 @@ public final class BuilderFactory {
   };
 
   public static final Builder<Long> LONG = new Builder<Long>() {
+    @Override
     public Long build(Object data) {
       return (Long) data;
     }
@@ -64,6 +68,7 @@ public final class BuilderFactory {
 
   };
   public static final Builder<String> STRING = new Builder<String>() {
+    @Override
     public String build(Object data) {
       return data == null ? null : SafeEncoder.encode((byte[]) data);
     }
@@ -75,6 +80,7 @@ public final class BuilderFactory {
 
   };
   public static final Builder<List<String>> STRING_LIST = new Builder<List<String>>() {
+    @Override
     @SuppressWarnings("unchecked")
     public List<String> build(Object data) {
       if (null == data) {
@@ -99,6 +105,7 @@ public final class BuilderFactory {
 
   };
   public static final Builder<Map<String, String>> STRING_MAP = new Builder<Map<String, String>>() {
+    @Override
     @SuppressWarnings("unchecked")
     public Map<String, String> build(Object data) {
       final List<byte[]> flatHash = (List<byte[]>) data;
@@ -119,6 +126,7 @@ public final class BuilderFactory {
   };
 
   public static final Builder<Map<String, String>> PUBSUB_NUMSUB_MAP = new Builder<Map<String, String>>() {
+    @Override
     @SuppressWarnings("unchecked")
     public Map<String, String> build(Object data) {
       final List<Object> flatHash = (List<Object>) data;
@@ -140,6 +148,7 @@ public final class BuilderFactory {
   };
 
   public static final Builder<Set<String>> STRING_SET = new Builder<Set<String>>() {
+    @Override
     @SuppressWarnings("unchecked")
     public Set<String> build(Object data) {
       if (null == data) {
@@ -165,6 +174,7 @@ public final class BuilderFactory {
   };
 
   public static final Builder<List<byte[]>> BYTE_ARRAY_LIST = new Builder<List<byte[]>>() {
+    @Override
     @SuppressWarnings("unchecked")
     public List<byte[]> build(Object data) {
       if (null == data) {
@@ -182,6 +192,7 @@ public final class BuilderFactory {
   };
 
   public static final Builder<Set<byte[]>> BYTE_ARRAY_ZSET = new Builder<Set<byte[]>>() {
+    @Override
     @SuppressWarnings("unchecked")
     public Set<byte[]> build(Object data) {
       if (null == data) {
@@ -205,6 +216,7 @@ public final class BuilderFactory {
     }
   };
   public static final Builder<Map<byte[], byte[]>> BYTE_ARRAY_MAP = new Builder<Map<byte[], byte[]>>() {
+    @Override
     @SuppressWarnings("unchecked")
     public Map<byte[], byte[]> build(Object data) {
       final List<byte[]> flatHash = (List<byte[]>) data;
@@ -225,6 +237,7 @@ public final class BuilderFactory {
   };
 
   public static final Builder<Set<String>> STRING_ZSET = new Builder<Set<String>>() {
+    @Override
     @SuppressWarnings("unchecked")
     public Set<String> build(Object data) {
       if (null == data) {
@@ -250,6 +263,7 @@ public final class BuilderFactory {
   };
 
   public static final Builder<Set<Tuple>> TUPLE_ZSET = new Builder<Set<Tuple>>() {
+    @Override
     @SuppressWarnings("unchecked")
     public Set<Tuple> build(Object data) {
       if (null == data) {
