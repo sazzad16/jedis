@@ -478,8 +478,7 @@ public class Client extends BinaryClient implements Commands {
   }
 
   @Override
-  public void zincrby(final String key, final double increment, final String member,
-      final ZIncrByParams params) {
+  public void zincrby(final String key, final double increment, final String member, final ZIncrByParams params) {
     zincrby(SafeEncoder.encode(key), increment, SafeEncoder.encode(member), params);
   }
 

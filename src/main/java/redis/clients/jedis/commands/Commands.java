@@ -39,9 +39,9 @@ public interface Commands {
 
   void ttl(String key);
 
-  void pttl(final String key);
+  void pttl(String key);
 
-  void touch(final String... keys);
+  void touch(String... keys);
 
   void setbit(String key, long offset, boolean value);
 
