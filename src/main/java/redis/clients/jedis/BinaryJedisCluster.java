@@ -21,6 +21,7 @@ import redis.clients.util.JedisClusterHashTagUtil;
 
 public class BinaryJedisCluster implements BinaryJedisClusterCommands,
     MultiKeyBinaryJedisClusterCommands, JedisClusterBinaryScriptingCommands, Closeable {
+
   public static final int HASHSLOTS = 16384;
   protected static final int DEFAULT_TIMEOUT = 2000;
   protected static final int DEFAULT_MAX_ATTEMPTS = 5;
@@ -1829,7 +1830,24 @@ public class BinaryJedisCluster implements BinaryJedisClusterCommands,
       }
     }.runBinary(key);
   }
-  
+
+  @Override
+  public Set<byte[]> keys(final byte[] pattern) {
+    if (pattern == null || pattern.length == 0) {
+      throw new IllegalArgumentException(this.getClass().getSimpleName() + " only supports KEYS commands with non-empty patterns");
+    }
+    if (JedisClusterHashTagUtil.isClusterCompliantMatchPattern(pattern)) {
+      return new JedisClusterCommand<Set<byte[]>>(connectionHandler, maxAttempts) {
+        @Override
+        public Set<byte[]> execute(Jedis connection) {
+          return connection.keys(pattern);
+        }
+      }.runBinary(pattern);
+    } else {
+      throw new IllegalArgumentException(this.getClass().getSimpleName() + " only supports KEYS commands with patterns containing hash-tags ( curly-brackets enclosed strings )");
+    }
+  }
+
   @Override
   public ScanResult<byte[]> scan(final byte[] cursor, final ScanParams params) {
 
