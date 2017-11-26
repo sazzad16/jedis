@@ -37,11 +37,7 @@ public abstract class JedisClusterConnectionHandler implements Closeable {
   private void initializeSlotsCache(Set<HostAndPort> startNodes, GenericObjectPoolConfig poolConfig,
                                     int connectionTimeout, int soTimeout, String password, String clientName) {
     for (HostAndPort hostAndPort : startNodes) {
-<<<<<<< HEAD
-      Jedis jedis = new Jedis(hostAndPort);
-=======
       Jedis jedis = null;
->>>>>>> xetorthio/2.10
       try {
         jedis = new Jedis(hostAndPort.getHost(), hostAndPort.getPort(), connectionTimeout, soTimeout);
         if (password != null) {

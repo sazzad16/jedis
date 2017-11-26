@@ -435,6 +435,7 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
   /**
    * @deprecated Use {@link #linsert(byte[], redis.clients.jedis.ListPosition, byte[], byte[]) 
    */
+  @Override
   public Response<Long> linsert(final byte[] key, final LIST_POSITION where, final byte[] pivot, final byte[] value) {
     getClient(key).linsert(key, where, pivot, value);
     return getResponse(BuilderFactory.LONG);
@@ -446,6 +447,7 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
     return getResponse(BuilderFactory.LONG);
   }
 
+  @Override
   public Response<Long> llen(final String key) {
     getClient(key).llen(key);
     return getResponse(BuilderFactory.LONG);
