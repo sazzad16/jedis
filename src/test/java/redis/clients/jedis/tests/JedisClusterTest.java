@@ -10,6 +10,7 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -163,7 +164,8 @@ public class JedisClusterTest {
     JedisCluster jc = new JedisCluster(jedisClusterNode, DEFAULT_TIMEOUT, DEFAULT_TIMEOUT, DEFAULT_REDIRECTIONS, "cluster", DEFAULT_CONFIG);
     assertEquals(3, jc.getClusterNodes().size());
     
-    JedisCluster jc2 = new JedisCluster(new HostAndPort("127.0.0.1", 7379), DEFAULT_TIMEOUT, DEFAULT_TIMEOUT, DEFAULT_REDIRECTIONS, "cluster", DEFAULT_CONFIG);
+    JedisCluster jc2 = new JedisCluster(Collections.singleton(new HostAndPort("127.0.0.1", 7379)),
+        DEFAULT_TIMEOUT, DEFAULT_TIMEOUT, DEFAULT_REDIRECTIONS, "cluster", DEFAULT_CONFIG);
     assertEquals(3, jc2.getClusterNodes().size());
   }
 
@@ -195,7 +197,8 @@ public class JedisClusterTest {
     assertEquals("bar", node3.get("foo"));
     assertEquals("test", node2.get("test"));
     
-    JedisCluster jc2 = new JedisCluster(new HostAndPort("127.0.0.1", 7379), DEFAULT_TIMEOUT, DEFAULT_TIMEOUT, DEFAULT_REDIRECTIONS, "cluster", DEFAULT_CONFIG);
+    JedisCluster jc2 = new JedisCluster(Collections.singleton(new HostAndPort("127.0.0.1", 7379)),
+        DEFAULT_TIMEOUT, DEFAULT_TIMEOUT, DEFAULT_REDIRECTIONS, "cluster", DEFAULT_CONFIG);
     jc2.set("foo", "bar");
     jc2.set("test", "test");
     assertEquals("bar", node3.get("foo"));
