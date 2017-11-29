@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static redis.clients.jedis.Protocol.toByteArray;
-
 public abstract class PipelineBase extends Queable implements BinaryRedisPipeline, RedisPipeline {
 
   protected abstract Client getClient(String key);
@@ -347,12 +345,14 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
     return getResponse(BuilderFactory.LONG);
   }
 
-  public Response<Long> hset(String key, Map<String, String> hash) {
+  @Override
+  public Response<Long> hset(final String key, final Map<String, String> hash) {
     getClient(key).hset(key, hash);
     return getResponse(BuilderFactory.LONG);
   }
 
-  public Response<Long> hset(byte[] key, Map<byte[], byte[]> hash) {
+  @Override
+  public Response<Long> hset(final byte[] key, final Map<byte[], byte[]> hash) {
     getClient(key).hset(key, hash);
     return getResponse(BuilderFactory.LONG);
   }
@@ -421,6 +421,7 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
    * @deprecated Use {@link #linsert(java.lang.String, redis.clients.jedis.ListPosition, java.lang.String, java.lang.String) 
    */
   @Override
+  @Deprecated
   public Response<Long> linsert(final String key, final LIST_POSITION where, final String pivot, final String value) {
     getClient(key).linsert(key, where, pivot, value);
     return getResponse(BuilderFactory.LONG);
@@ -929,7 +930,7 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
 
   @Override
   public Response<Long> zcount(final byte[] key, final double min, final double max) {
-    getClient(key).zcount(key, toByteArray(min), toByteArray(max));
+    getClient(key).zcount(key, min, max);
     return getResponse(BuilderFactory.LONG);
   }
 
@@ -983,7 +984,8 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
 
   @Override
   public Response<Set<byte[]>> zrangeByScore(final byte[] key, final double min, final double max) {
-    return zrangeByScore(key, toByteArray(min), toByteArray(max));
+    getClient(key).zrangeByScore(key, min, max);
+    return getResponse(BuilderFactory.BYTE_ARRAY_ZSET);
   }
 
   @Override
@@ -1015,7 +1017,8 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
   @Override
   public Response<Set<byte[]>> zrangeByScore(final byte[] key, final double min, final double max, final int offset,
       final int count) {
-    return zrangeByScore(key, toByteArray(min), toByteArray(max), offset, count);
+    getClient(key).zrangeByScore(key, min, max, offset, count);
+    return getResponse(BuilderFactory.BYTE_ARRAY_ZSET);
   }
 
   @Override
@@ -1066,7 +1069,7 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
   @Override
   public Response<Set<Tuple>> zrangeByScoreWithScores(final byte[] key, final double min, final double max,
       final int offset, final int count) {
-    getClient(key).zrangeByScoreWithScores(key, toByteArray(min), toByteArray(max), offset, count);
+    getClient(key).zrangeByScoreWithScores(key, min, max, offset, count);
     return getResponse(BuilderFactory.TUPLE_ZSET);
   }
 
@@ -1085,7 +1088,7 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
 
   @Override
   public Response<Set<byte[]>> zrevrangeByScore(final byte[] key, final double max, final double min) {
-    getClient(key).zrevrangeByScore(key, toByteArray(max), toByteArray(min));
+    getClient(key).zrevrangeByScore(key, max, min);
     return getResponse(BuilderFactory.BYTE_ARRAY_ZSET);
   }
 
@@ -1118,7 +1121,7 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
   @Override
   public Response<Set<byte[]>> zrevrangeByScore(final byte[] key, final double max, final double min, final int offset,
       final int count) {
-    getClient(key).zrevrangeByScore(key, toByteArray(max), toByteArray(min), offset, count);
+    getClient(key).zrevrangeByScore(key, max, min, offset, count);
     return getResponse(BuilderFactory.BYTE_ARRAY_ZSET);
   }
 
@@ -1143,7 +1146,7 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
 
   @Override
   public Response<Set<Tuple>> zrevrangeByScoreWithScores(final byte[] key, final double max, final double min) {
-    getClient(key).zrevrangeByScoreWithScores(key, toByteArray(max), toByteArray(min));
+    getClient(key).zrevrangeByScoreWithScores(key, max, min);
     return getResponse(BuilderFactory.TUPLE_ZSET);
   }
 
@@ -1170,8 +1173,7 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
   @Override
   public Response<Set<Tuple>> zrevrangeByScoreWithScores(final byte[] key, final double max, final double min,
       final int offset, final int count) {
-    getClient(key).zrevrangeByScoreWithScores(key, toByteArray(max), toByteArray(min), offset,
-      count);
+    getClient(key).zrevrangeByScoreWithScores(key, max, min, offset, count);
     return getResponse(BuilderFactory.TUPLE_ZSET);
   }
 
@@ -1244,7 +1246,7 @@ public abstract class PipelineBase extends Queable implements BinaryRedisPipelin
 
   @Override
   public Response<Long> zremrangeByScore(final byte[] key, final double min, final double max) {
-    getClient(key).zremrangeByScore(key, toByteArray(min), toByteArray(max));
+    getClient(key).zremrangeByScore(key, min, max);
     return getResponse(BuilderFactory.LONG);
   }
 

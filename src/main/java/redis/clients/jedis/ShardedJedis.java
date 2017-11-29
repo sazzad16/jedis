@@ -49,6 +49,12 @@ public class ShardedJedis extends BinaryShardedJedis implements JedisCommands, C
   }
 
   @Override
+  public String set(String key, String value, String expx, long time) {
+    Jedis j = getShard(key);
+    return j.set(key, value, expx, time);
+  }
+
+  @Override
   public String set(String key, String value, String nxxx) {
     Jedis j = getShard(key);
     return j.set(key, value, nxxx);
@@ -238,7 +244,8 @@ public class ShardedJedis extends BinaryShardedJedis implements JedisCommands, C
     return j.hset(key, field, value);
   }
 
-  public Long hset(String key, Map<String, String> hash) {
+  @Override
+  public Long hset(final String key, final Map<String, String> hash) {
     Jedis j = getShard(key);
     return j.hset(key, hash);
   }
@@ -738,6 +745,7 @@ public class ShardedJedis extends BinaryShardedJedis implements JedisCommands, C
    * @deprecated Use {@link #linsert(java.lang.String, redis.clients.jedis.ListPosition, java.lang.String, java.lang.String) 
    */
   @Override
+  @Deprecated
   public Long linsert(final String key, final LIST_POSITION where, final String pivot, final String value) {
     Jedis j = getShard(key);
     return j.linsert(key, where, pivot, value);
@@ -749,6 +757,7 @@ public class ShardedJedis extends BinaryShardedJedis implements JedisCommands, C
     return j.linsert(key, where, pivot, value);
   }
 
+  @Override
   public Long bitcount(final String key) {
     Jedis j = getShard(key);
     return j.bitcount(key);

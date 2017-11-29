@@ -54,6 +54,10 @@ public class Client extends BinaryClient implements Commands {
       SafeEncoder.encode(expx), time);
   }
 
+  public void set(final String key, final String value, final String expx, final long time) {
+    set(SafeEncoder.encode(key), SafeEncoder.encode(value), SafeEncoder.encode(expx), time);
+  }
+
   @Override
   public void get(final String key) {
     get(SafeEncoder.encode(key));
@@ -217,6 +221,7 @@ public class Client extends BinaryClient implements Commands {
     hset(SafeEncoder.encode(key), SafeEncoder.encode(field), SafeEncoder.encode(value));
   }
 
+  @Override
   public void hset(final String key, final Map<String, String> hash) {
     final Map<byte[], byte[]> bhash = new HashMap<byte[], byte[]>(hash.size());
     for (final Entry<String, String> entry : hash.entrySet()) {
@@ -800,6 +805,7 @@ public class Client extends BinaryClient implements Commands {
    * @deprecated Use {@link #linsert(java.lang.String, redis.clients.jedis.ListPosition, java.lang.String, java.lang.String) 
    */
   @Override
+  @Deprecated
   public void linsert(final String key, final LIST_POSITION where, final String pivot,
       final String value) {
     linsert(SafeEncoder.encode(key), where, SafeEncoder.encode(pivot), SafeEncoder.encode(value));

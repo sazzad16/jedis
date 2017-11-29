@@ -27,7 +27,7 @@ import javax.net.ssl.SSLSocketFactory;
 
 public class BinaryClient extends Connection {
   /**
-   * @deprecated Use {@link ListPosition}
+   * @deprecated Use {@link ListPosition} instead.
    */
   public enum LIST_POSITION {
     BEFORE, AFTER;
@@ -121,6 +121,10 @@ public class BinaryClient extends Connection {
   public void set(final byte[] key, final byte[] value, final byte[] nxxx, final byte[] expx,
       final long time) {
     sendCommand(SET, key, value, nxxx, expx, toByteArray(time));
+  }
+
+  public void set(final byte[] key, final byte[] value, final byte[] expx, final long time) {
+    sendCommand(Command.SET, key, value, expx, toByteArray(time));
   }
 
   public void get(final byte[] key) {
@@ -1104,7 +1108,6 @@ public class BinaryClient extends Connection {
       break;
     case NOT:
       kw = Keyword.NOT;
-      len = Math.min(1, len);
       break;
     }
 
