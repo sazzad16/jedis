@@ -1568,8 +1568,7 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
   public Double zincrby(final String key, final double increment, final String member) {
     checkIsInMultiOrPipeline();
     client.zincrby(key, increment, member);
-    String newscore = client.getBulkReply();
-    return Double.valueOf(newscore);
+    return BuilderFactory.DOUBLE.build(client.getOne());
   }
 
   @Override

@@ -1768,8 +1768,7 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   public Double zincrby(final byte[] key, final double increment, final byte[] member) {
     checkIsInMultiOrPipeline();
     client.zincrby(key, increment, member);
-    String newscore = client.getBulkReply();
-    return Double.valueOf(newscore);
+    return BuilderFactory.DOUBLE.build(client.getOne());
   }
 
   @Override
@@ -2275,7 +2274,9 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
 
   @Override
   public Long zcount(final byte[] key, final double min, final double max) {
-    return zcount(key, toByteArray(min), toByteArray(max));
+    checkIsInMultiOrPipeline();
+    client.zcount(key, min, max);
+    return client.getIntegerReply();
   }
 
   @Override
