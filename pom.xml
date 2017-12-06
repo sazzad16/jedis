@@ -26,7 +26,7 @@
     <connection>scm:git:git://github.com/sazzad16/jedis.git</connection>
     <developerConnection>scm:git:ssh://github.com:sazzad16/jedis.git</developerConnection>
     <url>http://github.com/sazzad16/jedis/tree/master</url>
-    <tag>jedis-2.10.0</tag>
+    <tag>jedis-2.10.1</tag>
   </scm>
 
   <dependencies>
