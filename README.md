@@ -16,7 +16,7 @@ Or use it as a maven dependency:
 <dependency>
     <groupId>com.github.sazzad16</groupId>
     <artifactId>jedis</artifactId>
-    <version>2.10.0</version>
+    <version>2.10.1</version>
 </dependency>
 ```
 
