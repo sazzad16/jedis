@@ -26,7 +26,6 @@ public abstract class JedisCommandTestBase {
     jedis = new Jedis(hnp.getHost(), hnp.getPort(), 500);
     jedis.connect();
     jedis.auth("foobared");
-    jedis.configSet("timeout", "300");
     jedis.flushAll();
   }
 
