@@ -7,8 +7,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,8 +15,10 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
+import redis.clients.jedis.BuilderFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Protocol;
 import redis.clients.jedis.Protocol.Keyword;
 import redis.clients.jedis.Response;
 import redis.clients.jedis.Transaction;
@@ -78,7 +78,7 @@ public class TransactionCommandsTest extends JedisCommandTestBase {
   }
 
   @Test
-  public void watch() throws UnknownHostException, IOException {
+  public void watch() {
     jedis.watch("mykey", "somekey");
     Transaction t = jedis.multi();
 
@@ -108,7 +108,7 @@ public class TransactionCommandsTest extends JedisCommandTestBase {
   }
 
   @Test
-  public void unwatch() throws UnknownHostException, IOException {
+  public void unwatch() {
     jedis.watch("mykey");
     String val = jedis.get("mykey");
     val = "foo";
@@ -328,7 +328,7 @@ public class TransactionCommandsTest extends JedisCommandTestBase {
   }
 
   @Test
-  public void testCloseable() throws IOException {
+  public void testCloseable() {
     // we need to test with fresh instance of Jedis
     Jedis jedis2 = new Jedis(hnp.getHost(), hnp.getPort(), 500);
     jedis2.auth("foobared");
@@ -346,6 +346,74 @@ public class TransactionCommandsTest extends JedisCommandTestBase {
       assertTrue(e.getMessage().contains("EXEC without MULTI"));
       // pass
     }
+  }
+
+  @Test
+  public void queuedError() {
+    Transaction t = jedis.multi();
+    Response<String> set = t.set("foo", "bar");
+    Response<String> len = t.lpop("foo");
+    Response<String> get = t.get("foo");
+    t.exec();
+    assertEquals("OK", set.get());
+    try {
+      len.get();
+      fail("Command should have got WRONGTYPE error");
+    } catch(JedisDataException jde) {
+      assertTrue(jde.getMessage().startsWith("WRONGTYPE"));
+    }
+    assertEquals("bar", get.get());
+  }
+
+  @Test
+  public void nonQueuedExecableError() {
+    Jedis slave = new Jedis(jedis.getClient().getHost(), 6383, 500);
+    slave.auth("foobared");
+    Transaction t = slave.multi();
+    Response<String> get1 = t.get("foo");
+    Response<String> set = t.set("foo", "bar");
+    Response<String> get2 = t.get("foo");
+    t.exec();
+    assertNull(get1.get());
+    assertNull(get2.get());
+    try {
+      set.get();
+      fail("Command should have got READONLY error");
+    } catch(JedisDataException jde) {
+      assertTrue(jde.getMessage().startsWith("READONLY"));
+    }
+    slave.close();
+  }
+
+  @Test
+  public void nonExecableError() {
+    class ErredTransactionJedis extends Jedis {
+      ErredTransactionJedis(String host, int port, int timeout) {
+        super(host, port, timeout);
+      }
+      @Override
+      public Transaction multi() {
+        client.multi();
+        client.getOne();
+        transaction = new Transaction(client) {
+          @Override
+          public Response<String> type(final String key) {
+            getClient(key).sendCommand(Protocol.Command.TYPE);
+            return enqueueResponse(getClient(key), BuilderFactory.STRING);
+          }
+        };
+        return transaction;
+      }
+    }
+
+    Jedis ej = new ErredTransactionJedis(jedis.getClient().getHost(), jedis.getClient().getPort(), 500);
+    ej.auth("foobared");
+
+    Transaction t = ej.multi();
+    Response<String> set = t.set("foo", "bar");
+    Response<String> type = t.type("foo"); // ERR wrong number of arguments for 'type' command
+    t.exec(); // EXECABORT Transaction discarded because of previous errors.
+    
   }
 
 }

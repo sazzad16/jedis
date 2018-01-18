@@ -49,6 +49,12 @@ public class Pipeline extends MultiKeyPipelineBase implements Closeable {
     }
   }
 
+  private final Client client;
+
+  public Pipeline(final Client client) {
+    this.client = client;
+  }
+
   @Override
   protected <T> Response<T> getResponse(Builder<T> builder) {
     if (currentMulti != null) {
@@ -62,10 +68,6 @@ public class Pipeline extends MultiKeyPipelineBase implements Closeable {
     }
   }
 
-  public void setClient(Client client) {
-    this.client = client;
-  }
-
   @Override
   protected Client getClient(byte[] key) {
     return client;
@@ -73,6 +75,11 @@ public class Pipeline extends MultiKeyPipelineBase implements Closeable {
 
   @Override
   protected Client getClient(String key) {
+    return client;
+  }
+
+  @Override
+  protected Client getClient() {
     return client;
   }
 
@@ -146,8 +153,7 @@ public class Pipeline extends MultiKeyPipelineBase implements Closeable {
     if (currentMulti != null) throw new JedisDataException("MULTI calls can not be nested");
 
     client.multi();
-    Response<String> response = getResponse(BuilderFactory.STRING); // Expecting
-    // OK
+    Response<String> response = getResponse(BuilderFactory.STRING); // Expecting OK
     currentMulti = new MultiResponseBuilder();
     return response;
   }

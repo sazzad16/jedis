@@ -1836,10 +1836,14 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   }
 
   public Transaction multi() {
+    checkIsInMultiOrPipeline();
     client.multi();
-    client.getOne(); // expected OK
-    transaction = new Transaction(client);
-    return transaction;
+    String reply = client.getStatusCodeReply();
+    if ("OK".equals(reply)) {
+      transaction = new Transaction(client);
+      return transaction;
+    }
+    throw new JedisException("Could not initiate transaction. Response: " + reply);
   }
 
   protected void checkIsInMultiOrPipeline() {
@@ -2224,8 +2228,11 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   }
 
   public Pipeline pipelined() {
-    pipeline = new Pipeline();
-    pipeline.setClient(client);
+    if (pipeline != null) {
+      throw new JedisException(
+          "Pipelines cannot be nested. Please use Pipeline or reset jedis state.");
+    }
+    pipeline = new Pipeline(client);
     return pipeline;
   }
 

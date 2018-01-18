@@ -13,9 +13,7 @@ public class Transaction extends MultiKeyPipelineBase implements Closeable {
 
   protected boolean inTransaction = true;
 
-  protected Transaction() {
-    // client will be set later in transaction block
-  }
+  private final Client client;
 
   public Transaction(final Client client) {
     this.client = client;
@@ -31,6 +29,11 @@ public class Transaction extends MultiKeyPipelineBase implements Closeable {
     return client;
   }
 
+  @Override
+  protected Client getClient() {
+    return client;
+  }
+
   public void clear() {
     if (inTransaction) {
       discard();
@@ -38,8 +41,6 @@ public class Transaction extends MultiKeyPipelineBase implements Closeable {
   }
 
   public List<Object> exec() {
-    // Discard QUEUED or ERROR
-    client.getMany(getPipelinedResponseLength());
     client.exec();
     inTransaction = false;
 
@@ -59,8 +60,6 @@ public class Transaction extends MultiKeyPipelineBase implements Closeable {
   }
 
   public List<Response<?>> execGetResponse() {
-    // Discard QUEUED or ERROR
-    client.getMany(getPipelinedResponseLength());
     client.exec();
     inTransaction = false;
 
@@ -76,15 +75,10 @@ public class Transaction extends MultiKeyPipelineBase implements Closeable {
   }
 
   public String discard() {
-    client.getMany(getPipelinedResponseLength());
     client.discard();
     inTransaction = false;
     clean();
     return client.getStatusCodeReply();
-  }
-
-  public void setClient(Client client) {
-    this.client = client;
   }
 
   @Override

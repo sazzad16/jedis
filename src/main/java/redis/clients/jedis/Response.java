@@ -3,8 +3,8 @@ package redis.clients.jedis;
 import redis.clients.jedis.exceptions.JedisDataException;
 
 public class Response<T> {
-  protected T response = null;
-  protected JedisDataException exception = null;
+  private T response = null;
+  private JedisDataException exception = null;
 
   private boolean building = false;
   private boolean built = false;
