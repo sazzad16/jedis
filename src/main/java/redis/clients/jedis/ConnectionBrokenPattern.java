@@ -1,5 +1,5 @@
 package redis.clients.jedis;
 
 public interface ConnectionBrokenPattern {
-  boolean determine(RuntimeException throwable);
+  boolean determine(Connection connection, RuntimeException throwable);
 }

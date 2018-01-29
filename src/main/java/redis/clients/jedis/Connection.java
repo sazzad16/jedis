@@ -37,7 +37,8 @@ public class Connection implements Closeable {
   private SSLSocketFactory sslSocketFactory;
   private SSLParameters sslParameters;
   private HostnameVerifier hostnameVerifier;
-  private ConnectionBrokenDeterminer connBrokenDeterminer = new ConnectionBrokenDeterminer();
+  private ConnectionBrokenDeterminer connBrokenDeterminer = new ConnectionBrokenDeterminer()
+      .considerJedisConnectionExceptionAsConnectionBroken();
 
   public Connection() {
   }
@@ -314,7 +315,7 @@ public class Connection implements Closeable {
     try {
       return Protocol.read(inputStream);
     } catch (RuntimeException e) {
-      if (connBrokenDeterminer.determine(e)) {
+      if (connBrokenDeterminer.determine(this, e)) {
         broken = true;
         if (e instanceof JedisConnectionException) {
           throw e;
