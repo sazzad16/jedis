@@ -8,12 +8,12 @@ import java.util.regex.Pattern;
 
 import redis.clients.jedis.commands.BinaryJedisCommands;
 import redis.clients.jedis.exceptions.JedisConnectionException;
-import redis.clients.jedis.params.geo.GeoRadiusParam;
-import redis.clients.jedis.params.set.SetParams;
-import redis.clients.jedis.params.sortedset.ZAddParams;
-import redis.clients.jedis.params.sortedset.ZIncrByParams;
-import redis.clients.util.Hashing;
-import redis.clients.util.Sharded;
+import redis.clients.jedis.params.GeoRadiusParam;
+import redis.clients.jedis.params.SetParams;
+import redis.clients.jedis.params.ZAddParams;
+import redis.clients.jedis.params.ZIncrByParams;
+import redis.clients.jedis.util.Hashing;
+import redis.clients.jedis.util.Sharded;
 
 public class BinaryShardedJedis extends Sharded<Jedis, JedisShardInfo> implements
     BinaryJedisCommands {
@@ -35,15 +35,17 @@ public class BinaryShardedJedis extends Sharded<Jedis, JedisShardInfo> implement
 
   public void disconnect() {
     for (Jedis jedis : getAllShards()) {
-      try {
-        jedis.quit();
-      } catch (JedisConnectionException e) {
-        // ignore the exception node, so that all other normal nodes can release all connections.
-      }
-      try {
-        jedis.disconnect();
-      } catch (JedisConnectionException e) {
-        // ignore the exception node, so that all other normal nodes can release all connections.
+      if (jedis.isConnected()) {
+        try {
+          jedis.quit();
+        } catch (JedisConnectionException e) {
+          // ignore the exception node, so that all other normal nodes can release all connections.
+        }
+        try {
+          jedis.disconnect();
+        } catch (JedisConnectionException e) {
+          // ignore the exception node, so that all other normal nodes can release all connections.
+        }
       }
     }
   }

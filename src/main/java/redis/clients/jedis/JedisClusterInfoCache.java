@@ -12,7 +12,7 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.exceptions.JedisException;
-import redis.clients.util.SafeEncoder;
+import redis.clients.jedis.util.SafeEncoder;
 
 public class JedisClusterInfoCache {
   private final Map<String, JedisPool> nodes = new HashMap<String, JedisPool>();
@@ -97,15 +97,16 @@ public class JedisClusterInfoCache {
         }
 
         for (JedisPool jp : getShuffledNodesPool()) {
+          Jedis j = null;
           try {
-            jedis = jp.getResource();
-            discoverClusterSlots(jedis);
+            j = jp.getResource();
+            discoverClusterSlots(j);
             return;
           } catch (JedisConnectionException e) {
             // try next nodes
           } finally {
-            if (jedis != null) {
-              jedis.close();
+            if (j != null) {
+              j.close();
             }
           }
         }
