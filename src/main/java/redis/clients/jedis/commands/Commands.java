@@ -7,12 +7,16 @@ import redis.clients.jedis.ListPosition;
 import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.SortingParams;
 import redis.clients.jedis.ZParams;
+import redis.clients.jedis.params.MigrateParams;
+import redis.clients.jedis.params.ClientKillParams;
 import redis.clients.jedis.params.SetParams;
 import redis.clients.jedis.params.ZAddParams;
 import redis.clients.jedis.params.ZIncrByParams;
 
 public interface Commands {
 
+  void ping(String message);
+  
   void set(String key, String value);
 
   void set(String key, String value, SetParams params);
@@ -307,6 +311,12 @@ public interface Commands {
 
   void bitop(BitOP op, String destKey, String... srcKeys);
 
+  void dump(String key);
+
+  void restore(String key, int ttl, byte[] serializedValue);
+
+  void restoreReplace(String key, int ttl, byte[] serializedValue);
+
   void scan(String cursor, ScanParams params);
 
   void hscan(String key, String cursor, ScanParams params);
@@ -330,4 +340,21 @@ public interface Commands {
    * @param field
    */
   void hstrlen(String key, String field);
+
+  void migrate(String host, int port, String key, int destinationDB, int timeout);
+
+  void migrate(String host, int port, int destinationDB, int timeout, MigrateParams params, String... keys);
+
+  void clientKill(String ipPort);
+
+  void clientKill(String ip, int port);
+
+  void clientKill(ClientKillParams params);
+
+  void clientGetname();
+
+  void clientList();
+
+  void clientSetname(String name);
+
 }
