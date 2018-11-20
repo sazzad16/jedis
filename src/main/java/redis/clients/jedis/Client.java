@@ -43,6 +43,11 @@ public class Client extends BinaryClient implements Commands {
   }
 
   @Override
+  public void ping(final String message) {
+    ping(SafeEncoder.encode(message));
+  }
+  
+  @Override
   public void set(final String key, final String value) {
     set(SafeEncoder.encode(key), SafeEncoder.encode(value));
   }
@@ -862,12 +867,19 @@ public class Client extends BinaryClient implements Commands {
     sentinel(SafeEncoder.encodeMany(args));
   }
 
+  @Override
   public void dump(final String key) {
     dump(SafeEncoder.encode(key));
   }
 
+  @Override
   public void restore(final String key, final int ttl, final byte[] serializedValue) {
     restore(SafeEncoder.encode(key), ttl, serializedValue);
+  }
+
+  @Override
+  public void restoreReplace(final String key, final int ttl, final byte[] serializedValue) {
+    restoreReplace(SafeEncoder.encode(key), ttl, serializedValue);
   }
 
   @Deprecated
@@ -911,8 +923,8 @@ public class Client extends BinaryClient implements Commands {
     srandmember(SafeEncoder.encode(key), count);
   }
 
-  public void clientKill(final String client) {
-    clientKill(SafeEncoder.encode(client));
+  public void clientKill(final String ipPort) {
+    clientKill(SafeEncoder.encode(ipPort));
   }
 
   public void clientSetname(final String name) {
@@ -921,7 +933,7 @@ public class Client extends BinaryClient implements Commands {
 
   public void migrate(final String host, final int port, final String key, final int destinationDb,
       final int timeout) {
-    migrate(SafeEncoder.encode(host), port, SafeEncoder.encode(key), destinationDb, timeout);
+    migrate(host, port, SafeEncoder.encode(key), destinationDb, timeout);
   }
 
   @Override
@@ -1146,13 +1158,31 @@ public class Client extends BinaryClient implements Commands {
     georadius(SafeEncoder.encode(key), longitude, latitude, radius, unit);
   }
 
+  public void georadiusReadonly(final String key, final double longitude, final double latitude, final double radius, final GeoUnit unit) {
+    georadiusReadonly(SafeEncoder.encode(key), longitude, latitude, radius, unit);
+  }
+
   public void georadius(final String key, final double longitude, final double latitude, final double radius, final GeoUnit unit,
       final GeoRadiusParam param) {
     georadius(SafeEncoder.encode(key), longitude, latitude, radius, unit, param);
   }
 
+  public void georadiusReadonly(final String key, final double longitude, final double latitude, final double radius, final GeoUnit unit,
+      final GeoRadiusParam param) {
+    georadiusReadonly(SafeEncoder.encode(key), longitude, latitude, radius, unit, param);
+  }
+
   public void georadiusByMember(final String key, final String member, final double radius, final GeoUnit unit) {
     georadiusByMember(SafeEncoder.encode(key), SafeEncoder.encode(member), radius, unit);
+  }
+
+  public void georadiusByMemberReadonly(final String key, final String member, final double radius, final GeoUnit unit) {
+    georadiusByMemberReadonly(SafeEncoder.encode(key), SafeEncoder.encode(member), radius, unit);
+  }
+
+  public void georadiusByMemberReadonly(final String key, final String member, final double radius, final GeoUnit unit,
+      final GeoRadiusParam param) {
+    georadiusByMemberReadonly(SafeEncoder.encode(key), SafeEncoder.encode(member), radius, unit, param);
   }
 
   public void georadiusByMember(final String key, final String member, final double radius, final GeoUnit unit,

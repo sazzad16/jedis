@@ -7,6 +7,8 @@ import java.util.Map;
 
 public interface Commands {
 
+  void ping(String message);
+  
   void set(String key, String value);
 
   public void set(final String key, final String value, final String nxxx, final String expx,
@@ -334,6 +336,12 @@ public interface Commands {
    */
   public void zscan(final String key, int cursor, final ScanParams params);
 
+  void dump(String key);
+
+  void restore(String key, int ttl, byte[] serializedValue);
+
+  void restoreReplace(String key, int ttl, byte[] serializedValue);
+
   void scan(String cursor, ScanParams params);
 
   void hscan(String key, String cursor, ScanParams params);
@@ -357,4 +365,17 @@ public interface Commands {
    * @param field
    */
   void hstrlen(String key, String field);
+
+  void clientKill(String ipPort);
+
+  void clientKill(String ip, int port);
+
+  void clientGetname();
+
+  void clientList();
+
+  void clientSetname(String name);
+
+  void migrate(String host, int port, String key, int destinationDB, int timeout);
+
 }

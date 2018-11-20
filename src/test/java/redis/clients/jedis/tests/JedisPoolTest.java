@@ -262,7 +262,7 @@ public class JedisPoolTest {
     } catch (Exception ignored) {
     }
 
-    assertEquals(destroyed.get(), 1);
+    assertEquals(1, destroyed.get());
   }
 
   @Test
@@ -364,9 +364,33 @@ public class JedisPoolTest {
   public void testAddObject() {
     JedisPool pool = new JedisPool(new JedisPoolConfig(), hnp.getHost(), hnp.getPort(), 2000);
     pool.addObjects(1);
-    assertEquals(pool.getNumIdle(), 1);
+    assertEquals(1, pool.getNumIdle());
     pool.destroy();
+  }
 
+  @Test
+  public void closeResourceTwice() {
+    JedisPool pool = new JedisPool(new JedisPoolConfig(), hnp.getHost(), hnp.getPort(), 2000);
+    Jedis j = pool.getResource();
+    j.auth("foobared");
+    j.ping();
+    j.close();
+    j.close();
+  }
+
+  @Test
+  public void closeBrokenResourceTwice() {
+    JedisPool pool = new JedisPool(new JedisPoolConfig(), hnp.getHost(), hnp.getPort(), 2000);
+    Jedis j = pool.getResource();
+    try {
+      // make connection broken
+      j.getClient().getOne();
+      fail();
+    } catch (Exception e) {
+    }
+    assertTrue(j.getClient().isBroken());
+    j.close();
+    j.close();
   }
 
   @Test

@@ -996,7 +996,10 @@ public class BinaryClient extends Connection {
   public void resetState() {
     if (isInMulti()) discard();
 
-    if (isInWatch()) unwatch();
+    if (isInWatch()) {
+      unwatch();
+      getStatusCodeReply();
+    }
   }
 
   public void eval(final byte[] script, final byte[] keyCount, final byte[][] params) {
@@ -1104,6 +1107,10 @@ public class BinaryClient extends Connection {
     pexpire(key, (long) milliseconds);
   }
 
+  public void restoreReplace(final byte[] key, final int ttl, final byte[] serializedValue) {
+    sendCommand(RESTORE, key, toByteArray(ttl), serializedValue, Keyword.REPLACE.raw);
+  }
+
   public void pexpire(final byte[] key, final long milliseconds) {
     sendCommand(PEXPIRE, key, toByteArray(milliseconds));
   }
@@ -1138,8 +1145,12 @@ public class BinaryClient extends Connection {
     sendCommand(SRANDMEMBER, key, toByteArray(count));
   }
 
-  public void clientKill(final byte[] client) {
-    sendCommand(CLIENT, Keyword.KILL.raw, client);
+  public void clientKill(final byte[] ipPort) {
+    sendCommand(CLIENT, Keyword.KILL.raw, ipPort);
+  }
+
+  public void clientKill(final String ip, final int port) {
+    sendCommand(CLIENT, Keyword.KILL.name(), ip + ':' + port);
   }
 
   public void clientGetname() {
@@ -1158,10 +1169,20 @@ public class BinaryClient extends Connection {
     sendCommand(TIME);
   }
 
+  /**
+   * @deprecated Use {@link #migrate(java.lang.String, int, byte[], int, int)}
+   */
+  @Deprecated
   public void migrate(final byte[] host, final int port, final byte[] key, final int destinationDb,
       final int timeout) {
     sendCommand(MIGRATE, host, toByteArray(port), key, toByteArray(destinationDb),
       toByteArray(timeout));
+  }
+
+  public void migrate(final String host, final int port, final byte[] key, final int destinationDb,
+      final int timeout) {
+    sendCommand(MIGRATE, SafeEncoder.encode(host), toByteArray(port), key,
+        toByteArray(destinationDb), toByteArray(timeout));
   }
 
   public void hincrByFloat(final byte[] key, final byte[] field, final double increment) {
@@ -1322,9 +1343,20 @@ public class BinaryClient extends Connection {
       unit.raw);
   }
 
+  public void georadiusReadonly(final byte[] key, final double longitude, final double latitude, final double radius, final GeoUnit unit) {
+    sendCommand(GEORADIUS_RO, key, toByteArray(longitude), toByteArray(latitude), toByteArray(radius),
+      unit.raw);
+  }
+
   public void georadius(final byte[] key, final double longitude, final double latitude, final double radius, final GeoUnit unit,
       final GeoRadiusParam param) {
     sendCommand(GEORADIUS, param.getByteParams(key, toByteArray(longitude), toByteArray(latitude),
+      toByteArray(radius), unit.raw));
+  }
+
+  public void georadiusReadonly(final byte[] key, final double longitude, final double latitude, final double radius, final GeoUnit unit,
+      final GeoRadiusParam param) {
+    sendCommand(GEORADIUS_RO, param.getByteParams(key, toByteArray(longitude), toByteArray(latitude),
       toByteArray(radius), unit.raw));
   }
 
@@ -1332,9 +1364,18 @@ public class BinaryClient extends Connection {
     sendCommand(GEORADIUSBYMEMBER, key, member, toByteArray(radius), unit.raw);
   }
 
+  public void georadiusByMemberReadonly(final byte[] key, final byte[] member, final double radius, final GeoUnit unit) {
+    sendCommand(GEORADIUSBYMEMBER_RO, key, member, toByteArray(radius), unit.raw);
+  }
+
   public void georadiusByMember(final byte[] key, final byte[] member, final double radius, final GeoUnit unit,
       final GeoRadiusParam param) {
     sendCommand(GEORADIUSBYMEMBER, param.getByteParams(key, member, toByteArray(radius), unit.raw));
+  }
+
+  public void georadiusByMemberReadonly(final byte[] key, final byte[] member, final double radius, final GeoUnit unit,
+      final GeoRadiusParam param) {
+    sendCommand(GEORADIUSBYMEMBER_RO, param.getByteParams(key, member, toByteArray(radius), unit.raw));
   }
 
   private ArrayList<byte[]> convertScoreMembersToByteArrays(final Map<byte[], Double> scoreMembers) {
