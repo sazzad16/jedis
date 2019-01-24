@@ -3550,6 +3550,12 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
     return client.getBulkReply();
   }
 
+  public String clientPause(final long timeout) {
+    checkIsInMultiOrPipeline();
+    client.clientPause(timeout);
+    return client.getBulkReply();
+  }
+
   public List<String> time() {
     checkIsInMultiOrPipeline();
     client.time();
@@ -3864,13 +3870,9 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
 
     @Override
     public boolean equals(Object o) {
-      if (o == this) {
-        return true;
-      }
-
-      if (!(o instanceof Set)) {
-        return false;
-      }
+      if (o == null) return false;
+      if (o == this) return true;
+      if (!(o instanceof Set)) return false;
 
       Collection<?> c = (Collection<?>) o;
       if (c.size() != size()) {

@@ -5,6 +5,38 @@
 
 This is a fork of [xetorthio/jedis](https://github.com/xetorthio/jedis), a java client for [antirez/redis](https://github.com/antirez/redis).
 
+Jedis is a blazingly small and sane [Redis](https://redis.io/) java client.
+
+Jedis was conceived to be EASY to use.
+
+Jedis is fully compatible with redis 2.8.x, 3.x.x and above*.
+
+*There are still couple of new functionalities added Redis 5 missing in Jedis like Streams.
+
+## So what can I do with Jedis?
+
+All of the following redis features are supported:
+
+- Sorting
+- Connection handling
+- Commands operating on any kind of values
+- Commands operating on string values
+- Commands operating on hashes
+- Commands operating on lists
+- Commands operating on sets
+- Commands operating on sorted sets
+- Transactions
+- Pipelining
+- Publish/Subscribe
+- Persistence control commands
+- Remote server control commands
+- Connection pooling
+- Sharding (MD5, MurmurHash)
+- Key-tags for sharding
+- Sharding with pipelining
+- Scripting with pipelining
+- Redis Cluster
+
 ## How do I use it?
 
 You can download the latest build at: 
