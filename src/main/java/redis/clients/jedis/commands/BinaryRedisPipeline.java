@@ -324,23 +324,4 @@ public interface BinaryRedisPipeline {
 
   Response<Long> hstrlen(byte[] key, byte[] field);
 
-  Response<Long> bitpos(byte[] key, boolean value);
-
-  Response<Long> bitpos(byte[] key, boolean value, BitPosParams params);
-
-  Response<String> set(byte[] key, byte[] value, SetParams params);
-
-  Response<List<byte[]>> srandmember(byte[] key, int count);
-
-  Response<Long> objectRefcount(byte[] key);
-
-  Response<byte[]> objectEncoding(byte[] key);
-
-  Response<Long> objectIdletime(byte[] key);
-
-  Response<Double> incrByFloat(byte[] key, double increment);
-
-  Response<String> psetex(byte[] key, long milliseconds, byte[] value);
-
-  Response<Double> hincrByFloat(byte[] key, byte[] field, double increment);
 }

@@ -322,28 +322,4 @@ public interface RedisPipeline {
   Response<List<GeoRadiusResponse>> georadiusByMemberReadonly(String key, String member, double radius,
       GeoUnit unit, GeoRadiusParam param);
 
-  Response<Long> bitpos(String key, boolean value);
-
-  Response<Long> bitpos(String key, boolean value, BitPosParams params);
-
-  Response<String> set(String key, String value, SetParams params);
-
-  Response<List<String>> srandmember(String key, int count);
-
-  Response<Set<Tuple>> zrangeByScoreWithScores(String key, String min, String max);
-
-  Response<Set<Tuple>> zrangeByScoreWithScores(String key, String min, String max, int offset,
-      int count);
-
-  Response<Long> objectRefcount(String key);
-
-  Response<String> objectEncoding(String key);
-
-  Response<Long> objectIdletime(String key);
-
-  Response<Double> incrByFloat(String key, double increment);
-
-  Response<String> psetex(String key, long milliseconds, String value);
-
-  Response<Double> hincrByFloat(String key, String field, double increment);
 }
