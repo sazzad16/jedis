@@ -371,6 +371,16 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   }
 
   /**
+   * @deprecated Use {@link Jedis#startPipeline() Jedis.startPipeline()}
+   * @return 
+   */
+  public Pipeline pipelined() {
+    pipeline = new Pipeline();
+    pipeline.setClient(client);
+    return pipeline;
+  }
+
+  /**
    * @return <code>PONG</code>
    */
   @Override
@@ -2729,12 +2739,6 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
     checkIsInMultiOrPipeline();
     client.auth(user, password);
     return client.getStatusCodeReply();
-  }
-
-  public Pipeline pipelined() {
-    pipeline = new Pipeline();
-    pipeline.setClient(client);
-    return pipeline;
   }
 
   @Override

@@ -8,6 +8,18 @@ import redis.clients.jedis.exceptions.JedisDataException;
 
 public class Pipeline extends MultiKeyPipelineBase implements Closeable {
 
+    private final Jedis resource;
+    
+    @Deprecated
+    public Pipeline() {
+        this.resource = null;
+    }
+
+    public Pipeline(Jedis resource) {
+        this.resource = resource;
+        this.client = resource.getClient();
+    }
+
   private MultiResponseBuilder currentMulti;
 
   private class MultiResponseBuilder extends Builder<List<Object>> {
@@ -62,15 +74,31 @@ public class Pipeline extends MultiKeyPipelineBase implements Closeable {
     }
   }
 
+  /**
+   * @deprecated This will be removed in future.
+   * @param client
+   */
   public void setClient(Client client) {
-    this.client = client;
+    if (this.resource == null) {
+      this.client = client;
+    }
   }
 
+  /**
+   * @deprecated This will be final in future.
+   * @param key
+   * @return 
+   */
   @Override
   protected Client getClient(byte[] key) {
     return client;
   }
 
+  /**
+   * @deprecated This will be final in future.
+   * @param key
+   * @return 
+   */
   @Override
   protected Client getClient(String key) {
     return client;
@@ -154,6 +182,9 @@ public class Pipeline extends MultiKeyPipelineBase implements Closeable {
   @Override
   public void close() {
     clear();
+    if (this.resource != null) {
+      this.resource.unsetDataSource();
+    }
   }
 
   public Response<String> watch(String... keys) {

@@ -7,6 +7,7 @@ import redis.clients.jedis.commands.MultiKeyBinaryJedisClusterCommands;
 import redis.clients.jedis.commands.ProtocolCommand;
 import redis.clients.jedis.params.*;
 import redis.clients.jedis.resps.*;
+import redis.clients.jedis.util.JedisClusterCRC16;
 import redis.clients.jedis.util.JedisClusterHashTagUtil;
 import redis.clients.jedis.util.KeyMergeUtil;
 import redis.clients.jedis.util.SafeEncoder;
@@ -31,7 +32,7 @@ public class BinaryJedisCluster implements BinaryJedisClusterCommands,
   public static final int DEFAULT_TIMEOUT = 2000;
   public static final int DEFAULT_MAX_ATTEMPTS = 5;
 
-  protected int maxAttempts;
+  protected final int maxAttempts;
 
   /**
    * After this amount of time we will do no more retries and report the operation as failed.
@@ -40,7 +41,7 @@ public class BinaryJedisCluster implements BinaryJedisClusterCommands,
    */
   protected Duration maxTotalRetriesDuration;
 
-  protected JedisClusterConnectionHandler connectionHandler;
+  protected final JedisClusterConnectionHandler connectionHandler;
 
   public BinaryJedisCluster(Set<HostAndPort> nodes) {
     this(nodes, DEFAULT_TIMEOUT);
@@ -126,6 +127,14 @@ public class BinaryJedisCluster implements BinaryJedisClusterCommands,
     if (connectionHandler != null) {
       connectionHandler.close();
     }
+  }
+
+  public Pipeline startPipeline(byte[] sampleKey) {
+    return startPipeline(JedisClusterCRC16.getSlot(sampleKey));
+  }
+
+  public Pipeline startPipeline(int hashSlot) {
+    return this.connectionHandler.getConnectionFromSlot(hashSlot).startPipeline();
   }
 
   public Map<String, JedisPool> getClusterNodes() {

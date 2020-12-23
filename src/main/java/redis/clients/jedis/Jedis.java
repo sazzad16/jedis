@@ -164,6 +164,43 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     super(jedisSocketFactory, clientConfig);
   }
 
+  @Override
+  public void close() {
+    if (dataSource != null) {
+      unsetDataSource();
+    } else {
+      super.close();
+    }
+  }
+
+  protected void unsetDataSource() {
+    if (dataSource != null) {
+      synchronized (this) {
+        if (dataSource != null) {
+          Pool<Jedis> pool = this.dataSource;
+          this.dataSource = null;
+          if (isBroken()) {
+            pool.returnBrokenResource(this);
+          } else {
+            pool.returnResource(this);
+          }
+        }
+      }
+    }
+  }
+
+  protected void setDataSource(Pool<Jedis> jedisPool) {
+    if (jedisPool == null) return;
+
+    this.dataSource = jedisPool;
+  }
+
+  public Pipeline startPipeline() {
+    checkIsInMultiOrPipeline();
+    pipeline = new Pipeline(this);
+    return pipeline;
+  }
+
   /**
    * COPY source destination [DB destination-db] [REPLACE]
    *
@@ -3937,25 +3974,6 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     checkIsInMultiOrPipeline();
     client.pubsubNumSub(channels);
     return BuilderFactory.PUBSUB_NUMSUB_MAP.build(client.getBinaryMultiBulkReply());
-  }
-
-  @Override
-  public void close() {
-    if (dataSource != null) {
-      Pool<Jedis> pool = this.dataSource;
-      this.dataSource = null;
-      if (isBroken()) {
-        pool.returnBrokenResource(this);
-      } else {
-        pool.returnResource(this);
-      }
-    } else {
-      super.close();
-    }
-  }
-
-  protected void setDataSource(Pool<Jedis> jedisPool) {
-    this.dataSource = jedisPool;
   }
 
   @Override

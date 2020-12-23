@@ -7,6 +7,7 @@ import redis.clients.jedis.commands.MultiKeyJedisClusterCommands;
 import redis.clients.jedis.commands.ProtocolCommand;
 import redis.clients.jedis.params.*;
 import redis.clients.jedis.resps.*;
+import redis.clients.jedis.util.JedisClusterCRC16;
 import redis.clients.jedis.util.JedisClusterHashTagUtil;
 import redis.clients.jedis.util.KeyMergeUtil;
 
@@ -180,6 +181,10 @@ public class JedisCluster extends BinaryJedisCluster implements JedisClusterComm
         return connection.copy(srcKey, dstKey, replace);
       }
     }.run(2, srcKey, dstKey);
+  }
+
+  public Pipeline startPipeline(String sampleKey) {
+    return startPipeline(JedisClusterCRC16.getSlot(sampleKey));
   }
 
   @Override
