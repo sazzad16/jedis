@@ -15,6 +15,7 @@ import javax.net.ssl.SSLSocketFactory;
 
 import redis.clients.jedis.args.*;
 import redis.clients.jedis.commands.*;
+import redis.clients.jedis.exceptions.JedisException;
 import redis.clients.jedis.params.*;
 import redis.clients.jedis.resps.*;
 import redis.clients.jedis.util.Pool;
@@ -190,9 +191,16 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
   }
 
   protected void setDataSource(Pool<Jedis> jedisPool) {
-    if (jedisPool == null) return;
+    if (jedisPool != null) {
+      synchronized (this) {
+        if (dataSource == null) {
+          this.dataSource = jedisPool;
+          return;
+        }
+      }
+    }
 
-    this.dataSource = jedisPool;
+    throw new JedisException("Could not set the data source.");
   }
 
   public Pipeline startPipeline() {
