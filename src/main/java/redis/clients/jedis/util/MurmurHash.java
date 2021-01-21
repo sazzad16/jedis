@@ -11,6 +11,7 @@
 
 package redis.clients.jedis.util;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -123,7 +124,7 @@ public class MurmurHash implements Hashing {
       ByteBuffer finish = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN);
       // for big-endian version, do this first:
       // finish.position(8-buf.remaining());
-      finish.put(buf).rewind();
+      ((Buffer) finish.put(buf)).rewind();
       h ^= finish.getLong();
       h *= m;
     }
