@@ -1,15 +1,10 @@
 package redis.clients.jedis;
 
-import java.net.URI;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.PooledObjectFactory;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
-
-import redis.clients.jedis.exceptions.InvalidURIException;
 import redis.clients.jedis.exceptions.JedisException;
-import redis.clients.jedis.util.JedisURIHelper;
 
 /**
  * PoolableObjectFactory custom impl.
@@ -19,68 +14,15 @@ public abstract class AbstractJedisFactory<J extends JedisBase> implements Poole
 
   private final AtomicReference<HostAndPort> hostAndPort = new AtomicReference<>();
 
-  private final String user;
-  private final String password;
-  private final int database;
-  private final String clientName;
-
   protected AbstractJedisFactory() {
-    this(null, null, Protocol.DEFAULT_DATABASE, null);
   }
 
-  protected AbstractJedisFactory(final HostAndPort hostAndPort, final JedisClientConfig clientConfig) {
+  protected AbstractJedisFactory(final HostAndPort hostAndPort) {
     this.hostAndPort.set(hostAndPort);
-    this.user = clientConfig.getUser();
-    this.password = clientConfig.getPassword();
-    this.database = clientConfig.getDatabase();
-    this.clientName = clientConfig.getClientName();
-  }
-
-  protected AbstractJedisFactory(final String host, final int port, final String user, final String password,
-      final int database, final String clientName) {
-    this.hostAndPort.set(new HostAndPort(host, port));
-    this.user = user;
-    this.password = password;
-    this.database = database;
-    this.clientName = clientName;
-  }
-
-  protected AbstractJedisFactory(final URI uri, final String clientName) {
-    if (!JedisURIHelper.isValid(uri)) {
-      throw new InvalidURIException(String.format(
-          "Cannot open Redis connection due invalid URI. %s", uri.toString()));
-    }
-    this.hostAndPort.set(new HostAndPort(uri.getHost(), uri.getPort()));
-    this.user = JedisURIHelper.getUser(uri);
-    this.password = JedisURIHelper.getPassword(uri);
-    this.database = JedisURIHelper.getDBIndex(uri);
-    this.clientName = clientName;
-  }
-
-  protected AbstractJedisFactory(final JedisClientConfig clientConfig) {
-    this.user = clientConfig.getUser();
-    this.password = clientConfig.getPassword();
-    this.database = clientConfig.getDatabase();
-    this.clientName = clientConfig.getClientName();
-  }
-
-  protected AbstractJedisFactory(final String user, final String password, final int database, final String clientName) {
-    this.user = user;
-    this.password = password;
-    this.database = database;
-    this.clientName = clientName;
   }
 
   public void setHostAndPort(final HostAndPort hostAndPort) {
     this.hostAndPort.set(hostAndPort);
-  }
-
-  @Override
-  public void activateObject(PooledObject<J> pooledJedis) throws Exception {
-    final J jedis = pooledJedis.getObject();
-    if (jedis.getDB() != database) {
-      jedis.select(database);
-    }
   }
 
   @Override
@@ -93,7 +35,7 @@ public abstract class AbstractJedisFactory<J extends JedisBase> implements Poole
       }
     }
     try {
-      jedis.disconnect();
+      jedis.close();
     } catch (Exception e) {
     }
   }
@@ -110,26 +52,17 @@ public abstract class AbstractJedisFactory<J extends JedisBase> implements Poole
 
     try {
       jedis.connect();
-      if (user != null) {
-        jedis.auth(user, password);
-      } else if (password != null) {
-        jedis.auth(password);
-      }
-      if (database != 0) {
-        jedis.select(database);
-      }
-      if (clientName != null) {
-        jedis.clientSetname(clientName);
-      }
     } catch (JedisException je) {
       try {
         if (jedis.isConnected() && !jedis.isBroken()) {
           jedis.quit();
         }
-      } catch(Exception e) {
-        // swallow
+      } catch (Exception e) {
       }
-      jedis.close();
+      try {
+        jedis.close();
+      } catch (Exception e) {
+      }
       throw je;
     }
     return new DefaultPooledObject<>(jedis);

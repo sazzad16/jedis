@@ -45,7 +45,7 @@ public abstract class AbstractJedisClusterConnectionHandler<J extends JedisBase,
     }
   }
 
-  protected abstract J createSeedConnection(HostAndPort hostAndPort);
+  protected abstract J createSeedConnection(HostAndPort hostAndPort) throws JedisException;
 
   public J getConnection() {
     // In antirez's redis-rb-cluster implementation, getRandomConnection always return valid

@@ -30,20 +30,54 @@ public class JedisBase<T extends JedisBase> implements BasicCommands, Closeable 
     this(hp.getHost(), hp.getPort());
   }
 
-  public JedisBase(final HostAndPort hp, final JedisSocketConfig config) {
-    this(hp.getHost(), hp.getPort(), config);
+  public JedisBase(final HostAndPort hp, final JedisClientConfig config) {
+    client = new Client(hp, config);
+    initializeFromClientConfig(config);
   }
 
   public JedisBase(final String host, final int port) {
     client = new Client(host, port);
   }
 
-  public JedisBase(final String host, final int port, final JedisSocketConfig config) {
-    client = new Client(host, port, config);
+  public JedisBase(final String host, final int port, final JedisClientConfig config) {
+    this(new HostAndPort(host, port), config);
   }
 
   public JedisBase(final JedisSocketFactory jedisSocketFactory) {
     client = new Client(jedisSocketFactory);
+  }
+
+  private void initializeFromClientConfig(JedisClientConfig config) {
+    try {
+      connect();
+      String password = config.getPassword();
+      if (password != null) {
+        String user = config.getUser();
+        if (user != null) {
+          auth(user, password);
+        } else {
+          auth(password);
+        }
+      }
+      int dbIndex = config.getDatabase();
+      if (dbIndex > 0) {
+        select(dbIndex);
+      }
+      String clientName = config.getClientName();
+      if (clientName != null) {
+        clientSetname(clientName);
+      }
+    } catch (JedisException je) {
+      try {
+        if (isConnected()) {
+          quit();
+        }
+        disconnect();
+      } catch (Exception e) {
+        //
+      }
+      throw je;
+    }
   }
 
   public boolean isBroken() {
@@ -146,13 +180,6 @@ public class JedisBase<T extends JedisBase> implements BasicCommands, Closeable 
     checkIsInMultiOrPipeline();
     client.flushAll();
     return client.getStatusCodeReply();
-  }
-
-  public Transaction multi() {
-    client.multi();
-    client.getOne(); // expected OK
-    transaction = new Transaction(client);
-    return transaction;
   }
 
   protected void checkIsInMultiOrPipeline() {

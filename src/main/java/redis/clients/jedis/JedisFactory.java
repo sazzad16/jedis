@@ -5,8 +5,11 @@ import java.net.URI;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocketFactory;
+import org.apache.commons.pool2.PooledObject;
 
 import org.apache.commons.pool2.PooledObjectFactory;
+
+import redis.clients.jedis.exceptions.InvalidURIException;
 import redis.clients.jedis.util.JedisURIHelper;
 
 /**
@@ -14,8 +17,7 @@ import redis.clients.jedis.util.JedisURIHelper;
  */
 public class JedisFactory extends AbstractJedisFactory<Jedis> implements PooledObjectFactory<Jedis> {
 
-  private final JedisSocketConfig socketConfig;
-  private final int infiniteSoTimeout;
+  private final JedisClientConfig config;
 
   protected JedisFactory(final String host, final int port, final int connectionTimeout,
       final int soTimeout, final String password, final int database, final String clientName) {
@@ -47,20 +49,20 @@ public class JedisFactory extends AbstractJedisFactory<Jedis> implements PooledO
   }
 
   protected JedisFactory(final HostAndPort hostAndPort, final JedisClientConfig clientConfig) {
-    super(hostAndPort, clientConfig);
-    this.socketConfig = DefaultJedisSocketConfig.copyConfig(clientConfig);
-    this.infiniteSoTimeout = clientConfig.getInfiniteSoTimeout();
+    super(hostAndPort);
+    this.config = DefaultJedisClientConfig.copyConfig(clientConfig);
   }
 
   protected JedisFactory(final String host, final int port, final int connectionTimeout, final int soTimeout,
       final int infiniteSoTimeout, final String user, final String password, final int database,
       final String clientName, final boolean ssl, final SSLSocketFactory sslSocketFactory,
       final SSLParameters sslParameters, final HostnameVerifier hostnameVerifier) {
-    super(host, port, user, password, database, clientName);
-    this.socketConfig = DefaultJedisSocketConfig.builder().withConnectionTimeout(connectionTimeout)
-        .withSoTimeout(soTimeout).withSsl(ssl).withSslSocketFactory(sslSocketFactory)
+    super(new HostAndPort(host, port));
+    this.config = DefaultJedisClientConfig.builder().withConnectionTimeout(connectionTimeout)
+        .withSoTimeout(soTimeout).withInfiniteSoTimeout(infiniteSoTimeout).withUser(user)
+        .withPassword(password).withDatabse(database).withClientName(clientName)
+        .withSsl(ssl).withSslSocketFactory(sslSocketFactory)
         .withSslParameters(sslParameters).withHostnameVerifier(hostnameVerifier).build();
-    this.infiniteSoTimeout = infiniteSoTimeout;
   }
 
   protected JedisFactory(final URI uri, final int connectionTimeout, final int soTimeout,
@@ -77,22 +79,34 @@ public class JedisFactory extends AbstractJedisFactory<Jedis> implements PooledO
   protected JedisFactory(final URI uri, final int connectionTimeout, final int soTimeout,
       final int infiniteSoTimeout, final String clientName, final SSLSocketFactory sslSocketFactory,
       final SSLParameters sslParameters, final HostnameVerifier hostnameVerifier) {
-    super(uri, clientName);
-    this.socketConfig = DefaultJedisSocketConfig.builder().withConnectionTimeout(connectionTimeout)
-        .withSoTimeout(soTimeout).withSsl(JedisURIHelper.isRedisSSLScheme(uri))
-        .withSslSocketFactory(sslSocketFactory).withSslParameters(sslParameters)
-        .withHostnameVerifier(hostnameVerifier).build();
-    this.infiniteSoTimeout = infiniteSoTimeout;
+    super(new HostAndPort(uri.getHost(), uri.getPort()));
+    if (!JedisURIHelper.isValid(uri)) {
+      throw new InvalidURIException(String.format(
+          "Cannot open Redis connection due invalid URI. %s", uri.toString()));
+    }
+    this.config = DefaultJedisClientConfig.builder().withConnectionTimeout(connectionTimeout)
+        .withSoTimeout(soTimeout).withInfiniteSoTimeout(infiniteSoTimeout)
+        .withUser(JedisURIHelper.getUser(uri)).withPassword(JedisURIHelper.getPassword(uri))
+        .withDatabse(JedisURIHelper.getDBIndex(uri)).withClientName(clientName)
+        .withSsl(JedisURIHelper.isRedisSSLScheme(uri)).withSslSocketFactory(sslSocketFactory)
+        .withSslParameters(sslParameters).withHostnameVerifier(hostnameVerifier).build();
   }
 
   protected JedisFactory(final JedisClientConfig clientConfig) {
-    super(clientConfig);
-    this.socketConfig = DefaultJedisSocketConfig.copyConfig(clientConfig);
-    this.infiniteSoTimeout = clientConfig.getInfiniteSoTimeout();
+    super();
+    this.config = clientConfig;
+  }
+
+  @Override
+  public void activateObject(PooledObject<Jedis> pooledJedis) throws Exception {
+    final BinaryJedis jedis = pooledJedis.getObject();
+    if (jedis.getDB() != config.getDatabase()) {
+      jedis.select(config.getDatabase());
+    }
   }
 
   @Override
   protected Jedis createObject(HostAndPort hostPort) {
-    return new Jedis(hostPort, socketConfig, infiniteSoTimeout);
+    return new Jedis(hostPort, config);
   }
 }

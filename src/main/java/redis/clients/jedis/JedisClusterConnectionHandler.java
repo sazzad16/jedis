@@ -4,8 +4,8 @@ import java.util.Set;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocketFactory;
-
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import redis.clients.jedis.exceptions.JedisException;
 
 public class JedisClusterConnectionHandler extends AbstractJedisClusterConnectionHandler<Jedis, JedisPool> {
 
@@ -100,18 +100,8 @@ public class JedisClusterConnectionHandler extends AbstractJedisClusterConnectio
   }
 
   @Override
-  protected Jedis createSeedConnection(HostAndPort hostAndPort) {
-    JedisClientConfig clientConfig = seedNodesConfig;
-    Jedis jedis = new Jedis(hostAndPort, (JedisSocketConfig) clientConfig, clientConfig.getInfiniteSoTimeout());
-    if (clientConfig.getUser() != null) {
-      jedis.auth(clientConfig.getUser(), clientConfig.getPassword());
-    } else if (clientConfig.getPassword() != null) {
-      jedis.auth(clientConfig.getPassword());
-    }
-    if (clientConfig.getClientName() != null) {
-      jedis.clientSetname(clientConfig.getClientName());
-    }
-    return jedis;
+  protected Jedis createSeedConnection(HostAndPort hostAndPort) throws JedisException {
+    return new Jedis(hostAndPort, seedNodesConfig);
   }
 
   @Override

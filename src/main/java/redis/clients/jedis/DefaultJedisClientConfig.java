@@ -4,7 +4,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocketFactory;
 
-public class DefaultJedisClientConfig implements JedisClientConfig {
+public final class DefaultJedisClientConfig implements JedisClientConfig {
 
   private final int connectionTimeout;
   private final int soTimeout;
@@ -190,5 +190,19 @@ public class DefaultJedisClientConfig implements JedisClientConfig {
       this.hostAndPortMapper = hostAndPortMapper;
       return this;
     }
+  }
+
+  public static DefaultJedisClientConfig copyConfig(JedisClientConfig copy) {
+    return new DefaultJedisClientConfig(copy.getConnectionTimeout(), copy.getSoTimeout(),
+        copy.getInfiniteSoTimeout(), copy.getUser(), copy.getPassword(), copy.getDatabase(),
+        copy.getClientName(), copy.isSsl(), copy.getSslSocketFactory(), copy.getSslParameters(),
+        copy.getHostnameVerifier(), copy.getHostAndPortMapper());
+  }
+
+  public static DefaultJedisClientConfig copyWithSsl(JedisClientConfig copy, boolean ssl) {
+    return new DefaultJedisClientConfig(copy.getConnectionTimeout(), copy.getSoTimeout(),
+        copy.getInfiniteSoTimeout(), copy.getUser(), copy.getPassword(), copy.getDatabase(),
+        copy.getClientName(), ssl, copy.getSslSocketFactory(), copy.getSslParameters(),
+        copy.getHostnameVerifier(), copy.getHostAndPortMapper());
   }
 }
