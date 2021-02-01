@@ -15,18 +15,14 @@ import javax.net.ssl.SSLSocketFactory;
 
 import redis.clients.jedis.args.*;
 import redis.clients.jedis.commands.*;
-import redis.clients.jedis.exceptions.JedisException;
 import redis.clients.jedis.params.*;
 import redis.clients.jedis.resps.*;
-import redis.clients.jedis.util.Pool;
 import redis.clients.jedis.util.SafeEncoder;
 import redis.clients.jedis.util.Slowlog;
 
 public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommands,
     AdvancedJedisCommands, ScriptingCommands, BasicCommands, ClusterCommands, SentinelCommands,
     ModuleCommands {
-
-  private Pool<Jedis> dataSource = null;
 
   public Jedis() {
     super();
@@ -163,38 +159,6 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
 
   public Jedis(final JedisSocketFactory jedisSocketFactory, final JedisClientConfig clientConfig) {
     super(jedisSocketFactory, clientConfig);
-  }
-
-  @Override
-  public void close() {
-    if (dataSource != null) {
-      unsetDataSource();
-    } else {
-      super.close();
-    }
-  }
-
-  protected void unsetDataSource() {
-    Pool<Jedis> pool = this.dataSource;
-    if (pool != null) {
-      this.dataSource = null;
-      if (isBroken()) {
-        pool.returnBrokenResource(this);
-      } else {
-        pool.returnResource(this);
-      }
-    }
-  }
-
-  protected void setDataSource(Pool<Jedis> jedisPool) {
-    if (jedisPool != null) {
-      if (dataSource != null) {
-        throw new JedisException("Data source is already set.");
-      }
-      this.dataSource = jedisPool;
-      return;
-    }
-    throw new JedisException("Could not set data source.");
   }
 
   public Pipeline startPipeline() {

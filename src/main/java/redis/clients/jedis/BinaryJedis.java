@@ -2,7 +2,6 @@ package redis.clients.jedis;
 
 import static redis.clients.jedis.Protocol.toByteArray;
 
-import java.io.Closeable;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.AbstractMap;
@@ -32,44 +31,26 @@ import redis.clients.jedis.exceptions.InvalidURIException;
 import redis.clients.jedis.exceptions.JedisException;
 import redis.clients.jedis.params.*;
 import redis.clients.jedis.resps.*;
+import redis.clients.jedis.util.JedisByteHashMap;
 import redis.clients.jedis.util.JedisURIHelper;
 
-public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKeyBinaryCommands,
-    AdvancedBinaryJedisCommands, BinaryScriptingCommands, Closeable {
-
-  protected final Client client;
-  protected Transaction transaction = null;
-  protected Pipeline pipeline = null;
-  protected static final byte[][] DUMMY_ARRAY = new byte[0][];
+public class BinaryJedis extends AbstractJedis implements BasicCommands, BinaryJedisCommands,
+    MultiKeyBinaryCommands, AdvancedBinaryJedisCommands, BinaryScriptingCommands {
 
   public BinaryJedis() {
-    client = new Client();
+    super();
   }
 
-  /**
-   * @deprecated This constructor will not support a host string in future. It will accept only a
-   * uri string. {@link JedisURIHelper#isValid(java.net.URI)} can used before this. If this
-   * constructor was being used with a host, it can be replaced with
-   * {@link #BinaryJedis(java.lang.String, int)} with the host and {@link Protocol#DEFAULT_PORT}.
-   * @param uriString
-   */
-  @Deprecated
   public BinaryJedis(final String uriString) {
-    URI uri = URI.create(uriString);
-    if (JedisURIHelper.isValid(uri)) {
-      client = createClientFromURI(uri);
-      initializeFromURI(uri);
-    } else {
-      client = new Client(uriString);
-    }
+    this(URI.create(uriString));
   }
 
   public BinaryJedis(final HostAndPort hp) {
-    this(hp, DefaultJedisClientConfig.builder().build());
+    super(hp);
   }
 
   public BinaryJedis(final String host, final int port) {
-    client = new Client(host, port);
+    super(host, port);
   }
 
   public BinaryJedis(final String host, final int port, final JedisClientConfig config) {
@@ -77,7 +58,7 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   }
 
   public BinaryJedis(final HostAndPort hostPort, final JedisClientConfig config) {
-    client = new Client(hostPort, config);
+    super(hostPort, config);
     initializeFromClientConfig(config);
   }
 
@@ -192,7 +173,7 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   }
 
   public BinaryJedis(URI uri) {
-    client = createClientFromURI(uri);
+    super(createClientFromURI(uri));
     initializeFromURI(uri);
   }
 
@@ -234,11 +215,7 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   }
 
   public BinaryJedis(final URI uri, JedisClientConfig config) {
-    if (!JedisURIHelper.isValid(uri)) {
-      throw new InvalidURIException(String.format(
-        "Cannot open Redis connection due invalid URI \"%s\".", uri.toString()));
-    }
-    client = new Client(new HostAndPort(uri.getHost(), uri.getPort()), DefaultJedisClientConfig
+    super(new HostAndPort(uri.getHost(), uri.getPort()), DefaultJedisClientConfig
         .builder().connectionTimeoutMillis(config.getConnectionTimeoutMillis())
         .socketTimeoutMillis(config.getSocketTimeoutMillis())
         .blockingSocketTimeoutMillis(config.getBlockingSocketTimeoutMillis())
@@ -283,11 +260,11 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
    */
   @Deprecated
   public BinaryJedis(final JedisSocketFactory jedisSocketFactory) {
-    client = new Client(jedisSocketFactory);
+    super(jedisSocketFactory);
   }
 
   public BinaryJedis(final JedisSocketFactory jedisSocketFactory, final JedisClientConfig clientConfig) {
-    client = new Client(jedisSocketFactory);
+    super(jedisSocketFactory);
     initializeFromClientConfig(clientConfig);
   }
 
@@ -450,6 +427,7 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   }
 
   /**
+<<<<<<< HEAD
    * Get the value of key and delete the key. This command is similar to GET, except for the fact
    * that it also deletes the key on success (if and only if the key's value type is a string).
    * <p>
@@ -485,6 +463,8 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   }
 
   /**
+=======
+>>>>>>> aaf1b52b... Abstract Jedis class
    * Test if the specified keys exist. The command returns the number of keys exist.
    * Time complexity: O(N)
    * @param keys
@@ -577,29 +557,6 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   }
 
   /**
-   * Delete all the keys of the currently selected DB. This command never fails.
-   * @return Status code reply
-   */
-  @Override
-  public String flushDB() {
-    checkIsInMultiOrPipeline();
-    client.flushDB();
-    return client.getStatusCodeReply();
-  }
-
-  /**
-   * Delete all the keys of the currently selected DB. This command never fails.
-   * @param flushMode
-   * @return Status code reply
-   */
-  @Override
-  public String flushDB(FlushMode flushMode) {
-    checkIsInMultiOrPipeline();
-    client.flushDB(flushMode);
-    return client.getStatusCodeReply();
-  }
-
-  /**
    * Returns all the keys matching the glob-style pattern as space separated strings. For example if
    * you have in the database the keys "foo" and "foobar" the command "KEYS foo*" will return
    * "foo foobar".
@@ -676,17 +633,6 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   public Long renamenx(final byte[] oldkey, final byte[] newkey) {
     checkIsInMultiOrPipeline();
     client.renamenx(oldkey, newkey);
-    return client.getIntegerReply();
-  }
-
-  /**
-   * Return the number of keys in the currently selected database.
-   * @return Integer reply
-   */
-  @Override
-  public Long dbSize() {
-    checkIsInMultiOrPipeline();
-    client.dbSize();
     return client.getIntegerReply();
   }
 
@@ -785,29 +731,6 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   }
 
   /**
-   * Select the DB with having the specified zero-based numeric index. For default every new client
-   * connection is automatically selected to DB 0.
-   * @param index
-   * @return Status code reply
-   */
-  @Override
-  public String select(final int index) {
-    checkIsInMultiOrPipeline();
-    client.select(index);
-    String statusCodeReply = client.getStatusCodeReply();
-    client.setDb(index);
-
-    return statusCodeReply;
-  }
-
-  @Override
-  public String swapDB(final int index1, final int index2) {
-    checkIsInMultiOrPipeline();
-    client.swapDB(index1, index2);
-    return client.getStatusCodeReply();
-  }
-
-  /**
    * Move the specified key from the currently selected DB to the specified destination DB. Note
    * that this command returns 1 only if the key was successfully moved, and 0 if the target key was
    * already there or if the source key was not found at all, so it is possible to use MOVE as a
@@ -822,31 +745,6 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
     checkIsInMultiOrPipeline();
     client.move(key, dbIndex);
     return client.getIntegerReply();
-  }
-
-  /**
-   * Delete all the keys of all the existing databases, not just the currently selected one. This
-   * command never fails.
-   * @return Status code reply
-   */
-  @Override
-  public String flushAll() {
-    checkIsInMultiOrPipeline();
-    client.flushAll();
-    return client.getStatusCodeReply();
-  }
-
-  /**
-   * Delete all the keys of all the existing databases, not just the currently selected one. This
-   * command never fails.
-   * @param flushMode
-   * @return Status code reply
-   */
-  @Override
-  public String flushAll(FlushMode flushMode) {
-    checkIsInMultiOrPipeline();
-    client.flushAll(flushMode);
-    return client.getStatusCodeReply();
   }
 
   /**
@@ -2295,23 +2193,6 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
     return getTupledSet();
   }
 
-  public Transaction multi() {
-    client.multi();
-    client.getOne(); // expected OK
-    transaction = new Transaction(client);
-    return transaction;
-  }
-
-  protected void checkIsInMultiOrPipeline() {
-    if (client.isInMulti()) {
-      throw new IllegalStateException(
-          "Cannot use Jedis when in Multi. Please use Transaction or reset jedis state.");
-    } else if (pipeline != null && pipeline.hasPipelinedResponse()) {
-      throw new IllegalStateException(
-          "Cannot use Jedis when in Pipeline. Please use Pipeline or reset jedis state.");
-    }
-  }
-
   @Override
   public String watch(final byte[]... keys) {
     checkIsInMultiOrPipeline();
@@ -3401,6 +3282,7 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   }
 
   /**
+<<<<<<< HEAD
    * Synchronously save the DB on disk.
    * <p>
    * Save the whole dataset on disk (this means that all the databases are saved, as well as keys
@@ -3585,6 +3467,8 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   }
 
   /**
+=======
+>>>>>>> aaf1b52b... Abstract Jedis class
    * Retrieve the configuration of a running Redis server. Not all the configuration parameters are
    * supported.
    * <p>
@@ -3626,6 +3510,7 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   }
 
   /**
+<<<<<<< HEAD
    * Reset the stats returned by INFO
    * @return
    */
@@ -3670,6 +3555,8 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   }
 
   /**
+=======
+>>>>>>> aaf1b52b... Abstract Jedis class
    * Alter the configuration of a running Redis server. Not all the configuration parameters are
    * supported.
    * <p>
@@ -3766,16 +3653,6 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
     checkIsInMultiOrPipeline();
     client.linsert(key, where, pivot, value);
     return client.getIntegerReply();
-  }
-
-  @Override
-  public String debug(final DebugParams params) {
-    client.debug(params);
-    return client.getStatusCodeReply();
-  }
-
-  public Client getClient() {
-    return client;
   }
 
   /**
@@ -4370,18 +4247,6 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
     checkIsInMultiOrPipeline();
     client.migrate(host, port, destinationDB, timeout, params, keys);
     return client.getStatusCodeReply();
-  }
-
-  /**
-   * Syncrhonous replication of Redis as described here: http://antirez.com/news/66 Since Java
-   * Object class has implemented "wait" method, we cannot use it, so I had to change the name of
-   * the method. Sorry :S
-   */
-  @Override
-  public Long waitReplicas(final int replicas, final long timeout) {
-    checkIsInMultiOrPipeline();
-    client.waitReplicas(replicas, timeout);
-    return client.getIntegerReply();
   }
 
   @Override
