@@ -35,8 +35,6 @@ import redis.clients.jedis.util.Slowlog;
 public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommands,
     AdvancedJedisCommands, ScriptingCommands, BasicCommands, ClusterCommands, SentinelCommands, ModuleCommands {
 
-  protected JedisPoolAbstract dataSource = null;
-
   public Jedis() {
     super();
   }
@@ -121,11 +119,6 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
         sslParameters, hostnameVerifier);
   }
 
-  /**
-   * @param shardInfo
-   * @deprecated Internal behavior of this constructor has been changed.
-   */
-  @Deprecated
   public Jedis(JedisShardInfo shardInfo) {
     super(shardInfo);
   }
@@ -3627,25 +3620,6 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     checkIsInMultiOrPipeline();
     client.pubsubNumSub(channels);
     return BuilderFactory.PUBSUB_NUMSUB_MAP.build(client.getBinaryMultiBulkReply());
-  }
-
-  @Override
-  public void close() {
-    if (dataSource != null) {
-      JedisPoolAbstract pool = this.dataSource;
-      this.dataSource = null;
-      if (client.isBroken()) {
-        pool.returnBrokenResource(this);
-      } else {
-        pool.returnResource(this);
-      }
-    } else {
-      super.close();
-    }
-  }
-
-  public void setDataSource(JedisPoolAbstract jedisPool) {
-    this.dataSource = jedisPool;
   }
 
   @Override

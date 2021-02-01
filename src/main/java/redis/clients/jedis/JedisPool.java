@@ -338,14 +338,7 @@ public class JedisPool extends JedisPoolAbstract {
   }
 
   @Override
-  protected void returnBrokenResource(final Jedis resource) {
-    if (resource != null) {
-      returnBrokenResourceObject(resource);
-    }
-  }
-
-  @Override
-  protected void returnResource(final Jedis resource) {
+  public void returnResource(final Jedis resource) {
     if (resource != null) {
       try {
         resource.resetState();
