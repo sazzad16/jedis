@@ -8,7 +8,7 @@ import redis.clients.jedis.exceptions.JedisDataException;
 import redis.clients.jedis.exceptions.JedisException;
 import redis.clients.jedis.util.Pool;
 
-public class AbstractJedis<T extends AbstractJedis> implements BasicCommands, Closeable {
+public abstract class AbstractJedis<T extends AbstractJedis> implements BasicCommands, Closeable {
 
   protected static final byte[][] DUMMY_ARRAY = new byte[0][];
 
@@ -473,6 +473,12 @@ public class AbstractJedis<T extends AbstractJedis> implements BasicCommands, Cl
   @Override
   public int getDB() {
     return client.getDB();
+  }
+
+  public String clientSetname(final String name) {
+    checkIsInMultiOrPipeline();
+    client.clientSetname(name);
+    return client.getStatusCodeReply();
   }
 
   /**

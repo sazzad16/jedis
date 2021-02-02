@@ -3342,13 +3342,6 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
   }
 
   @Override
-  public String clientSetname(final String name) {
-    checkIsInMultiOrPipeline();
-    client.clientSetname(name);
-    return client.getStatusCodeReply();
-  }
-
-  @Override
   public Long clientId() {
     checkIsInMultiOrPipeline();
     client.clientId();

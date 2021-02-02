@@ -15,6 +15,7 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import redis.clients.jedis.AbstractJedisFactory;
 
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
@@ -201,7 +202,7 @@ public class JedisSentinelPoolTest {
 
     final AtomicInteger destroyed = new AtomicInteger(0);
 
-    class CrashingJedisPooledObjectFactory implements PooledObjectFactory<Jedis> {
+    class CrashingJedisPooledObjectFactory extends AbstractJedisFactory<Jedis> {
 
       @Override
       public PooledObject<Jedis> makeObject() throws Exception {
@@ -225,13 +226,16 @@ public class JedisSentinelPoolTest {
       @Override
       public void passivateObject(PooledObject<Jedis> p) throws Exception {
       }
+
+      @Override
+      protected Jedis createObject(HostAndPort hostPort) {
+        throw new UnsupportedOperationException();
+      }
     }
 
     GenericObjectPoolConfig config = new GenericObjectPoolConfig();
     config.setMaxTotal(1);
-    JedisSentinelPool pool = new JedisSentinelPool(MASTER_NAME, sentinels, config, 1000,
-        "foobared", 2);
-    pool.initPool(config, new CrashingJedisPooledObjectFactory());
+    JedisSentinelPool pool = new JedisSentinelPool(MASTER_NAME, sentinels, config, new CrashingJedisPooledObjectFactory());
     Jedis crashingJedis = pool.getResource();
 
     try {

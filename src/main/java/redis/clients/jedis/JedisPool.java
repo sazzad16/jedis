@@ -5,6 +5,7 @@ import java.net.URI;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocketFactory;
+import org.apache.commons.pool2.PooledObjectFactory;
 
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -12,44 +13,23 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.exceptions.JedisException;
 import redis.clients.jedis.util.JedisURIHelper;
 
-public class JedisPool extends JedisPoolAbstract {
+public class JedisPool extends AbstractJedisPool<Jedis> {
 
   public JedisPool() {
     this(Protocol.DEFAULT_HOST, Protocol.DEFAULT_PORT);
-  }
-
-  public JedisPool(final GenericObjectPoolConfig poolConfig, final String host) {
-    this(poolConfig, host, Protocol.DEFAULT_PORT);
   }
 
   public JedisPool(String host, int port) {
     this(new GenericObjectPoolConfig(), host, port);
   }
 
-  public JedisPool(final String host) {
-    URI uri = URI.create(host);
-    if (JedisURIHelper.isValid(uri)) {
-      this.internalPool = new GenericObjectPool<>(new JedisFactory(uri,
-          Protocol.DEFAULT_TIMEOUT, Protocol.DEFAULT_TIMEOUT, null), new GenericObjectPoolConfig());
-    } else {
-      this.internalPool = new GenericObjectPool<>(new JedisFactory(host,
-          Protocol.DEFAULT_PORT, Protocol.DEFAULT_TIMEOUT, Protocol.DEFAULT_TIMEOUT, null,
-          Protocol.DEFAULT_DATABASE, null), new GenericObjectPoolConfig());
-    }
+  public JedisPool(final String uri) {
+    this(URI.create(uri));
   }
 
-  public JedisPool(final String host, final SSLSocketFactory sslSocketFactory,
+  public JedisPool(final String uri, final SSLSocketFactory sslSocketFactory,
       final SSLParameters sslParameters, final HostnameVerifier hostnameVerifier) {
-    URI uri = URI.create(host);
-    if (JedisURIHelper.isValid(uri)) {
-      this.internalPool = new GenericObjectPool<>(new JedisFactory(uri,
-          Protocol.DEFAULT_TIMEOUT, Protocol.DEFAULT_TIMEOUT, null, sslSocketFactory, sslParameters,
-          hostnameVerifier), new GenericObjectPoolConfig());
-    } else {
-      this.internalPool = new GenericObjectPool<>(new JedisFactory(host,
-          Protocol.DEFAULT_PORT, Protocol.DEFAULT_TIMEOUT, Protocol.DEFAULT_TIMEOUT, null,
-          Protocol.DEFAULT_DATABASE, null, false, null, null, null), new GenericObjectPoolConfig());
-    }
+    this(URI.create(uri), sslSocketFactory, sslParameters, hostnameVerifier);
   }
 
   public JedisPool(final URI uri) {
@@ -234,9 +214,13 @@ public class JedisPool extends JedisPoolAbstract {
         user, password, database, clientName, ssl, sslSocketFactory, sslParameters, hostnameVerifier));
   }
 
-  public JedisPool(final GenericObjectPoolConfig poolConfig, final HostAndPort hostAndPort,
+  public JedisPool(final GenericObjectPoolConfig<Jedis> poolConfig, final HostAndPort hostAndPort,
       final JedisClientConfig clientConfig) {
-    super(poolConfig, new JedisFactory(hostAndPort, clientConfig));
+    this(poolConfig, new JedisFactory(hostAndPort, clientConfig));
+  }
+
+  public JedisPool(final GenericObjectPoolConfig<Jedis> poolConfig, final PooledObjectFactory<Jedis> factory) {
+    super(poolConfig, factory);
   }
 
   public JedisPool(final GenericObjectPoolConfig poolConfig) {
@@ -328,25 +312,5 @@ public class JedisPool extends JedisPoolAbstract {
       final HostnameVerifier hostnameVerifier) {
     super(poolConfig, new JedisFactory(uri, connectionTimeout, soTimeout, infiniteSoTimeout, null,
         sslSocketFactory, sslParameters, hostnameVerifier));
-  }
-
-  @Override
-  public Jedis getResource() {
-    Jedis jedis = super.getResource();
-    jedis.setDataSource(this);
-    return jedis;
-  }
-
-  @Override
-  public void returnResource(final Jedis resource) {
-    if (resource != null) {
-      try {
-        resource.resetState();
-        returnResourceObject(resource);
-      } catch (Exception e) {
-        returnBrokenResource(resource);
-        throw new JedisException("Resource is returned to the pool as broken", e);
-      }
-    }
   }
 }

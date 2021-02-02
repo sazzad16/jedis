@@ -52,7 +52,7 @@ public class JedisPoolTest {
 
   @Test
   public void checkConnectionWithDefaultPort() {
-    JedisPool pool = new JedisPool(new JedisPoolConfig(), hnp.getHost());
+    JedisPool pool = new JedisPool(new JedisPoolConfig(), hnp.getHost(), hnp.getPort());
     try (Jedis jedis = pool.getResource()) {
       jedis.auth("foobared");
       jedis.set("foo", "bar");
@@ -250,8 +250,7 @@ public class JedisPoolTest {
 
     GenericObjectPoolConfig config = new GenericObjectPoolConfig();
     config.setMaxTotal(1);
-    JedisPool pool = new JedisPool(config, hnp.getHost(), hnp.getPort(), 2000, "foobared");
-    pool.initPool(config, new CrashingJedisPooledObjectFactory());
+    JedisPool pool = new JedisPool(config, new CrashingJedisPooledObjectFactory());
     Jedis crashingJedis = pool.getResource();
 
     try {
@@ -300,7 +299,7 @@ public class JedisPoolTest {
     }
 
     pool.close();
-    assertTrue(pool.getNumActive() < 0);
+    assertTrue(pool.getNumActive() <= 0);
   }
 
   @Test
@@ -353,6 +352,7 @@ public class JedisPoolTest {
       Jedis j = pool.getResource();
       try {
         // make connection broken
+        j.connect();
         j.getClient().getOne();
         fail();
       } catch (Exception e) {
