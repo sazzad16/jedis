@@ -20,7 +20,7 @@ import redis.clients.jedis.resps.*;
 import redis.clients.jedis.util.SafeEncoder;
 import redis.clients.jedis.util.Slowlog;
 
-public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommands,
+public class Jedis extends BinaryJedis<Jedis> implements JedisCommands, MultiKeyCommands,
     AdvancedJedisCommands, ScriptingCommands, BasicCommands, ClusterCommands, SentinelCommands,
     ModuleCommands {
 
@@ -3645,13 +3645,6 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     checkIsInMultiOrPipeline();
     client.clientInfo();
     return client.getBulkReply();
-  }
-
-  @Override
-  public String clientSetname(final String name) {
-    checkIsInMultiOrPipeline();
-    client.clientSetname(name);
-    return client.getStatusCodeReply();
   }
 
   @Override

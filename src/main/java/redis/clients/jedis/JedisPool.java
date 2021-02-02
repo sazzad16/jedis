@@ -7,15 +7,10 @@ import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.commons.pool2.PooledObjectFactory;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.util.JedisURIHelper;
-import redis.clients.jedis.util.Pool;
 
-public class JedisPool extends Pool<Jedis> {
-
-  private static final Logger log = LoggerFactory.getLogger(JedisPool.class);
+public class JedisPool extends AbstractJedisPool<Jedis> {
 
   public JedisPool() {
     this(Protocol.DEFAULT_HOST, Protocol.DEFAULT_PORT);
@@ -252,7 +247,11 @@ public class JedisPool extends Pool<Jedis> {
 
   public JedisPool(final GenericObjectPoolConfig<Jedis> poolConfig, final HostAndPort hostAndPort,
       final JedisClientConfig clientConfig) {
-    super(poolConfig, new JedisFactory(hostAndPort, clientConfig));
+    this(poolConfig, new JedisFactory(hostAndPort, clientConfig));
+  }
+
+  public JedisPool(final GenericObjectPoolConfig<Jedis> poolConfig, final PooledObjectFactory<Jedis> factory) {
+    super(poolConfig, factory);
   }
 
   public JedisPool(final GenericObjectPoolConfig<Jedis> poolConfig, final JedisSocketFactory jedisSocketFactory,
@@ -349,29 +348,5 @@ public class JedisPool extends Pool<Jedis> {
       final HostnameVerifier hostnameVerifier) {
     super(poolConfig, new JedisFactory(uri, connectionTimeout, soTimeout, infiniteSoTimeout, null,
         sslSocketFactory, sslParameters, hostnameVerifier));
-  }
-
-  public JedisPool(GenericObjectPoolConfig poolConfig, PooledObjectFactory<Jedis> factory) {
-    super(poolConfig, factory);
-  }
-
-  @Override
-  public Jedis getResource() {
-    Jedis jedis = super.getResource();
-    jedis.setDataSource(this);
-    return jedis;
-  }
-
-  @Override
-  public void returnResource(final Jedis resource) {
-    if (resource != null) {
-      try {
-        resource.resetState();
-        returnResourceObject(resource);
-      } catch (Exception e) {
-        returnBrokenResource(resource);
-        log.warn("Resource is returned to the pool as broken", e);
-      }
-    }
   }
 }

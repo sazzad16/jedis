@@ -34,7 +34,7 @@ import redis.clients.jedis.resps.*;
 import redis.clients.jedis.util.JedisByteHashMap;
 import redis.clients.jedis.util.JedisURIHelper;
 
-public class BinaryJedis extends AbstractJedis implements BasicCommands, BinaryJedisCommands,
+public class BinaryJedis<J extends BinaryJedis> extends AbstractJedis<J> implements BasicCommands, BinaryJedisCommands,
     MultiKeyBinaryCommands, AdvancedBinaryJedisCommands, BinaryScriptingCommands {
 
   public BinaryJedis() {

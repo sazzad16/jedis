@@ -55,7 +55,7 @@ public class JedisPoolTest {
 
   @Test
   public void checkConnectionWithDefaultPort() {
-    JedisPool pool = new JedisPool(new JedisPoolConfig(), hnp.getHost());
+    JedisPool pool = new JedisPool(new JedisPoolConfig(), hnp.getHost(), hnp.getPort());
     try (Jedis jedis = pool.getResource()) {
       jedis.auth("foobared");
       jedis.set("foo", "bar");
@@ -301,7 +301,7 @@ public class JedisPoolTest {
     }
 
     pool.close();
-    assertTrue(pool.getNumActive() < 0);
+    assertTrue(pool.getNumActive() <= 0);
   }
 
   @Test
@@ -354,6 +354,7 @@ public class JedisPoolTest {
       Jedis j = pool.getResource();
       try {
         // make connection broken
+        j.connect();
         j.getClient().getOne();
         fail();
       } catch (Exception e) {
