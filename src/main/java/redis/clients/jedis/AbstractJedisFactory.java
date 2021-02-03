@@ -17,7 +17,7 @@ import redis.clients.jedis.util.JedisURIHelper;
  * PoolableObjectFactory custom impl.
  * @param <J>
  */
-public abstract class AbstractJedisFactory<J extends AbstractJedis> implements PooledObjectFactory<J> {
+public abstract class AbstractJedisFactory<J extends JedisBase> implements PooledObjectFactory<J> {
 
   private static final Logger logger = LoggerFactory.getLogger(JedisFactory.class);
 

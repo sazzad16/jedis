@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.exceptions.JedisException;
 import redis.clients.jedis.util.Pool;
 
-public abstract class AbstractJedisPool<J extends AbstractJedis> extends Pool<J> {
+public abstract class JedisPoolBase<J extends JedisBase> extends Pool<J> {
 
   private static final Logger log = LoggerFactory.getLogger(JedisPool.class);
 
-  public AbstractJedisPool(GenericObjectPoolConfig<J> poolConfig, PooledObjectFactory<J> factory) {
+  public JedisPoolBase(GenericObjectPoolConfig<J> poolConfig, PooledObjectFactory<J> factory) {
     super(poolConfig, factory);
   }
 
