@@ -13,7 +13,7 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.exceptions.JedisException;
 import redis.clients.jedis.util.JedisURIHelper;
 
-public class JedisPool extends AbstractJedisPool<Jedis> {
+public class JedisPool extends JedisPoolBase<Jedis> {
 
   public JedisPool() {
     this(Protocol.DEFAULT_HOST, Protocol.DEFAULT_PORT);

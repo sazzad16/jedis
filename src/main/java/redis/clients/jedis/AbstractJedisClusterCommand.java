@@ -9,17 +9,17 @@ import redis.clients.jedis.exceptions.JedisNoReachableClusterNodeException;
 import redis.clients.jedis.exceptions.JedisRedirectionException;
 import redis.clients.jedis.util.JedisClusterCRC16;
 
-public abstract class JedisClusterCommand<T> {
+public abstract class AbstractJedisClusterCommand<T, J extends JedisBase> {
 
-  private final JedisClusterConnectionHandler connectionHandler;
+  private final AbstractJedisClusterConnectionHandler<J, ?> connectionHandler;
   private final int maxAttempts;
 
-  public JedisClusterCommand(JedisClusterConnectionHandler connectionHandler, int maxAttempts) {
+  public AbstractJedisClusterCommand(AbstractJedisClusterConnectionHandler<J, ?> connectionHandler, int maxAttempts) {
     this.connectionHandler = connectionHandler;
     this.maxAttempts = maxAttempts;
   }
 
-  public abstract T execute(Jedis connection);
+  public abstract T execute(J connection);
 
   public T run(String key) {
     return runWithRetries(JedisClusterCRC16.getSlot(key), this.maxAttempts, false, null);
@@ -70,7 +70,7 @@ public abstract class JedisClusterCommand<T> {
   }
 
   public T runWithAnyNode() {
-    Jedis connection = null;
+    J connection = null;
     try {
       connection = connectionHandler.getConnection();
       return execute(connection);
@@ -84,7 +84,7 @@ public abstract class JedisClusterCommand<T> {
       throw new JedisClusterMaxAttemptsException("No more cluster attempts left.");
     }
 
-    Jedis connection = null;
+    J connection = null;
     try {
 
       if (redirect != null) {
@@ -137,7 +137,7 @@ public abstract class JedisClusterCommand<T> {
     }
   }
 
-  private void releaseConnection(Jedis connection) {
+  private void releaseConnection(J connection) {
     if (connection != null) {
       connection.close();
     }

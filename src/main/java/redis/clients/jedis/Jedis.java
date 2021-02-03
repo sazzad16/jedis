@@ -3591,12 +3591,6 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     return client.getObjectMultiBulkReply();
   }
 
-  public String asking() {
-    checkIsInMultiOrPipeline();
-    client.asking();
-    return client.getStatusCodeReply();
-  }
-
   public List<String> pubsubChannels(final String pattern) {
     checkIsInMultiOrPipeline();
     client.pubsubChannels(pattern);
@@ -4108,22 +4102,5 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
 
     return BuilderFactory.STREAM_CONSUMERS_INFO_LIST.build(client.getObjectMultiBulkReply());
 
-  }
-
-  public Object sendCommand(ProtocolCommand cmd, String... args) {
-    checkIsInMultiOrPipeline();
-    client.sendCommand(cmd, args);
-    return client.getOne();
-  }
-
-  public Object sendBlockingCommand(ProtocolCommand cmd, String... args) {
-    checkIsInMultiOrPipeline();
-    client.sendCommand(cmd, args);
-    client.setTimeoutInfinite();
-    try {
-      return client.getOne();
-    } finally {
-      client.rollbackTimeout();
-    }
   }
 }

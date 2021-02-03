@@ -6,9 +6,9 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.exceptions.JedisException;
 import redis.clients.jedis.util.Pool;
 
-public abstract class AbstractJedisPool<J extends AbstractJedis> extends Pool<J> {
+public abstract class JedisPoolBase<J extends JedisBase> extends Pool<J> {
 
-  public AbstractJedisPool(GenericObjectPoolConfig<J> poolConfig, PooledObjectFactory<J> factory) {
+  public JedisPoolBase(GenericObjectPoolConfig<J> poolConfig, PooledObjectFactory<J> factory) {
     super(poolConfig, factory);
   }
 

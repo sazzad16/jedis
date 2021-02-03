@@ -3,7 +3,6 @@ package redis.clients.jedis;
 import redis.clients.jedis.commands.BinaryJedisClusterCommands;
 import redis.clients.jedis.commands.JedisClusterBinaryScriptingCommands;
 import redis.clients.jedis.commands.MultiKeyBinaryJedisClusterCommands;
-import redis.clients.jedis.commands.ProtocolCommand;
 import redis.clients.jedis.params.GeoRadiusParam;
 import redis.clients.jedis.params.GeoRadiusStoreParam;
 import redis.clients.jedis.params.SetParams;
@@ -24,16 +23,10 @@ import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
-public class BinaryJedisCluster implements BinaryJedisClusterCommands,
-    MultiKeyBinaryJedisClusterCommands, JedisClusterBinaryScriptingCommands, Closeable {
-
-  public static final int HASHSLOTS = 16384;
-  protected static final int DEFAULT_TIMEOUT = 2000;
-  protected static final int DEFAULT_MAX_ATTEMPTS = 5;
-
-  protected int maxAttempts;
-
-  protected JedisClusterConnectionHandler connectionHandler;
+public class BinaryJedisCluster
+    extends JedisClusterBase<Jedis, JedisPool, JedisClusterConnectionHandler>
+    implements BinaryJedisClusterCommands, MultiKeyBinaryJedisClusterCommands,
+    JedisClusterBinaryScriptingCommands, Closeable {
 
   public BinaryJedisCluster(Set<HostAndPort> nodes) {
     this(nodes, DEFAULT_TIMEOUT);
@@ -49,7 +42,7 @@ public class BinaryJedisCluster implements BinaryJedisClusterCommands,
   }
 
   public BinaryJedisCluster(Set<HostAndPort> jedisClusterNode, int connectionTimeout,
-                            int soTimeout, int maxAttempts, final GenericObjectPoolConfig poolConfig) {
+      int soTimeout, int maxAttempts, final GenericObjectPoolConfig poolConfig) {
     this(jedisClusterNode, connectionTimeout, soTimeout, maxAttempts, null, poolConfig);
   }
 
@@ -62,16 +55,14 @@ public class BinaryJedisCluster implements BinaryJedisClusterCommands,
   }
 
   public BinaryJedisCluster(Set<HostAndPort> jedisClusterNode, int connectionTimeout, int soTimeout, int maxAttempts, String user, String password, String clientName, GenericObjectPoolConfig poolConfig) {
-    this.connectionHandler = new JedisSlotBasedConnectionHandler(jedisClusterNode, poolConfig,
-        connectionTimeout, soTimeout, user, password, clientName);
-    this.maxAttempts = maxAttempts;
+    super(new JedisClusterConnectionHandler(jedisClusterNode, poolConfig, connectionTimeout,
+        soTimeout, user, password, clientName), maxAttempts);
   }
 
   public BinaryJedisCluster(Set<HostAndPort> jedisClusterNode, int connectionTimeout, int soTimeout,
       int infiniteSoTimeout, int maxAttempts, String user, String password, String clientName, GenericObjectPoolConfig poolConfig) {
-    this.connectionHandler = new JedisSlotBasedConnectionHandler(jedisClusterNode, poolConfig,
-        connectionTimeout, soTimeout, infiniteSoTimeout, user, password, clientName);
-    this.maxAttempts = maxAttempts;
+    super(new JedisClusterConnectionHandler(jedisClusterNode, poolConfig, connectionTimeout,
+        soTimeout, infiniteSoTimeout, user, password, clientName), maxAttempts);
   }
 
   public BinaryJedisCluster(Set<HostAndPort> jedisClusterNode, int connectionTimeout, int soTimeout, int maxAttempts, String password, String clientName, GenericObjectPoolConfig poolConfig,
@@ -111,32 +102,18 @@ public class BinaryJedisCluster implements BinaryJedisClusterCommands,
    */
   @Deprecated
   public BinaryJedisCluster(Set<HostAndPort> jedisClusterNode, int connectionTimeout, int soTimeout,
-      int infiniteSoTimeout, int maxAttempts, String user, String password, String clientName, GenericObjectPoolConfig poolConfig,
-      boolean ssl, SSLSocketFactory sslSocketFactory, SSLParameters sslParameters, HostnameVerifier hostnameVerifier, JedisClusterHostAndPortMap hostAndPortMap) {
-    this.connectionHandler = new JedisSlotBasedConnectionHandler(jedisClusterNode, poolConfig,
-        connectionTimeout, soTimeout, infiniteSoTimeout, user, password, clientName, ssl, sslSocketFactory, sslParameters, hostnameVerifier, hostAndPortMap);
-    this.maxAttempts = maxAttempts;
+      int infiniteSoTimeout, int maxAttempts, String user, String password, String clientName,
+      GenericObjectPoolConfig poolConfig, boolean ssl, SSLSocketFactory sslSocketFactory,
+      SSLParameters sslParameters, HostnameVerifier hostnameVerifier,
+      JedisClusterHostAndPortMap hostAndPortMap) {
+    super(new JedisClusterConnectionHandler(jedisClusterNode, poolConfig, connectionTimeout,
+        soTimeout, infiniteSoTimeout, user, password, clientName, ssl, sslSocketFactory,
+        sslParameters, hostnameVerifier, hostAndPortMap), maxAttempts);
   }
 
   public BinaryJedisCluster(Set<HostAndPort> jedisClusterNode, JedisClientConfig clientConfig,
       int maxAttempts, GenericObjectPoolConfig poolConfig) {
-    this.connectionHandler = new JedisSlotBasedConnectionHandler(jedisClusterNode, poolConfig, clientConfig);
-    this.maxAttempts = maxAttempts;
-  }
-
-  @Override
-  public void close() {
-    if (connectionHandler != null) {
-      connectionHandler.close();
-    }
-  }
-
-  public Map<String, JedisPool> getClusterNodes() {
-    return connectionHandler.getNodes();
-  }
-
-  public Jedis getConnectionFromSlot(int slot) {
-	  return  this.connectionHandler.getConnectionFromSlot(slot);
+    super(new JedisClusterConnectionHandler(jedisClusterNode, poolConfig, clientConfig), maxAttempts);
   }
 
   @Override
@@ -2409,23 +2386,5 @@ public class BinaryJedisCluster implements BinaryJedisClusterCommands,
         return connection.waitReplicas(replicas, timeout);
       }
     }.runBinary(key);
-  }
-
-  public Object sendCommand(final byte[] sampleKey, final ProtocolCommand cmd, final byte[]... args) {
-    return new JedisClusterCommand<Object>(connectionHandler, maxAttempts) {
-      @Override
-      public Object execute(Jedis connection){
-        return connection.sendCommand(cmd, args);
-      }
-    }.runBinary(sampleKey);
-  }
-
-  public Object sendBlockingCommand(final byte[] sampleKey, final ProtocolCommand cmd, final byte[]... args) {
-    return new JedisClusterCommand<Object>(connectionHandler, maxAttempts) {
-      @Override
-      public Object execute(Jedis connection){
-        return connection.sendBlockingCommand(cmd, args);
-      }
-    }.runBinary(sampleKey);
   }
 }
