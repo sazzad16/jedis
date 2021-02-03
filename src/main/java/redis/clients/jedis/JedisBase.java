@@ -8,7 +8,7 @@ import redis.clients.jedis.exceptions.JedisDataException;
 import redis.clients.jedis.exceptions.JedisException;
 import redis.clients.jedis.util.Pool;
 
-public abstract class AbstractJedis<T extends AbstractJedis> implements BasicCommands, Closeable {
+public class JedisBase<T extends JedisBase> implements BasicCommands, Closeable {
 
   protected static final byte[][] DUMMY_ARRAY = new byte[0][];
 
@@ -18,31 +18,31 @@ public abstract class AbstractJedis<T extends AbstractJedis> implements BasicCom
 
   private Pool<T> dataSource = null;
 
-  public AbstractJedis(Client client) {
+  public JedisBase(Client client) {
     this.client = client;
   }
 
-  public AbstractJedis() {
+  public JedisBase() {
     client = new Client();
   }
 
-  public AbstractJedis(final HostAndPort hp) {
+  public JedisBase(final HostAndPort hp) {
     this(hp.getHost(), hp.getPort());
   }
 
-  public AbstractJedis(final HostAndPort hp, final JedisSocketConfig config) {
+  public JedisBase(final HostAndPort hp, final JedisSocketConfig config) {
     this(hp.getHost(), hp.getPort(), config);
   }
 
-  public AbstractJedis(final String host, final int port) {
+  public JedisBase(final String host, final int port) {
     client = new Client(host, port);
   }
 
-  public AbstractJedis(final String host, final int port, final JedisSocketConfig config) {
+  public JedisBase(final String host, final int port, final JedisSocketConfig config) {
     client = new Client(host, port, config);
   }
 
-  public AbstractJedis(final JedisSocketFactory jedisSocketFactory) {
+  public JedisBase(final JedisSocketFactory jedisSocketFactory) {
     client = new Client(jedisSocketFactory);
   }
 
@@ -475,6 +475,12 @@ public abstract class AbstractJedis<T extends AbstractJedis> implements BasicCom
     return client.getDB();
   }
 
+  public String asking() {
+    checkIsInMultiOrPipeline();
+    client.asking();
+    return client.getStatusCodeReply();
+  }
+
   public String clientSetname(final String name) {
     checkIsInMultiOrPipeline();
     client.clientSetname(name);
@@ -493,7 +499,17 @@ public abstract class AbstractJedis<T extends AbstractJedis> implements BasicCom
     return client.getIntegerReply();
   }
 
+  public Object sendCommand(ProtocolCommand cmd) {
+    return sendCommand(cmd, DUMMY_ARRAY);
+  }
+
   public Object sendCommand(ProtocolCommand cmd, byte[]... args) {
+    checkIsInMultiOrPipeline();
+    client.sendCommand(cmd, args);
+    return client.getOne();
+  }
+
+  public Object sendCommand(ProtocolCommand cmd, String... args) {
     checkIsInMultiOrPipeline();
     client.sendCommand(cmd, args);
     return client.getOne();
@@ -510,7 +526,14 @@ public abstract class AbstractJedis<T extends AbstractJedis> implements BasicCom
     }
   }
 
-  public Object sendCommand(ProtocolCommand cmd) {
-    return sendCommand(cmd, DUMMY_ARRAY);
+  public Object sendBlockingCommand(ProtocolCommand cmd, String... args) {
+    checkIsInMultiOrPipeline();
+    client.sendCommand(cmd, args);
+    client.setTimeoutInfinite();
+    try {
+      return client.getOne();
+    } finally {
+      client.rollbackTimeout();
+    }
   }
 }

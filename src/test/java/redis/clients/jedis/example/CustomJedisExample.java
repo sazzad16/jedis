@@ -1,11 +1,11 @@
 package redis.clients.jedis.example;
 
-import redis.clients.jedis.AbstractJedis;
+import redis.clients.jedis.JedisBase;
 import redis.clients.jedis.BuilderFactory;
 
 public class CustomJedisExample {
 
-  public static class CustomJedis extends AbstractJedis {
+  public static class CustomJedis extends JedisBase {
 
     public CustomJedis() {
     }

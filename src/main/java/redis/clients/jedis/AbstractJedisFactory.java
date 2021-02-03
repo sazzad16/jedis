@@ -15,7 +15,7 @@ import redis.clients.jedis.util.JedisURIHelper;
  * PoolableObjectFactory custom impl.
  * @param <J>
  */
-public abstract class AbstractJedisFactory<J extends AbstractJedis> implements PooledObjectFactory<J> {
+public abstract class AbstractJedisFactory<J extends JedisBase> implements PooledObjectFactory<J> {
 
   private final AtomicReference<HostAndPort> hostAndPort = new AtomicReference<>();
 

@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.exceptions.JedisException;
 
-public class JedisSentinelPool extends AbstractJedisPool<Jedis> {
+public class JedisSentinelPool extends JedisPoolBase<Jedis> {
   protected Logger log = LoggerFactory.getLogger(getClass().getName());
 
   protected final JedisClientConfig sentinelClientConfig;
