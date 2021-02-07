@@ -3,6 +3,7 @@ package redis.clients.jedis;
 import java.io.Closeable;
 import java.util.Map;
 import redis.clients.jedis.commands.ProtocolCommand;
+import redis.clients.jedis.util.JedisClusterCRC16;
 
 public class JedisClusterBase<J extends JedisBase, P extends JedisPoolBase<J>,
     H extends AbstractJedisClusterConnectionHandler<J, P>> implements Closeable {
@@ -38,6 +39,18 @@ public class JedisClusterBase<J extends JedisBase, P extends JedisPoolBase<J>,
 
   public J getConnectionFromSlot(int slot) {
     return this.connectionHandler.getConnectionFromSlot(slot);
+  }
+
+  public Pipeline startPipeline(int hashSlot) {
+    return this.connectionHandler.getConnectionFromSlot(hashSlot).startPipeline();
+  }
+
+  public Pipeline startPipeline(byte[] sampleKey) {
+    return startPipeline(JedisClusterCRC16.getSlot(sampleKey));
+  }
+
+  public Pipeline startPipeline(String sampleKey) {
+    return startPipeline(JedisClusterCRC16.getSlot(sampleKey));
   }
 
   public Object sendCommand(final byte[] sampleKey, final ProtocolCommand cmd, final byte[]... args) {

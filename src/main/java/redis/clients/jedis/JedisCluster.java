@@ -1,6 +1,5 @@
 package redis.clients.jedis;
 
-import redis.clients.jedis.commands.ProtocolCommand;
 import redis.clients.jedis.params.GeoRadiusParam;
 import redis.clients.jedis.params.GeoRadiusStoreParam;
 import redis.clients.jedis.params.SetParams;

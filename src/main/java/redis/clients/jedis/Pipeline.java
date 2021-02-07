@@ -6,7 +6,19 @@ import java.util.List;
 
 import redis.clients.jedis.exceptions.JedisDataException;
 
-public class Pipeline extends MultiKeyPipelineBase implements Closeable {
+public class Pipeline<J extends JedisBase> extends MultiKeyPipelineBase implements Closeable {
+
+    private final J resource;
+    
+    @Deprecated
+    public Pipeline() {
+        this.resource = null;
+    }
+
+    public Pipeline(J resource) {
+        this.resource = resource;
+        this.client = resource.getClient();
+    }
 
   private MultiResponseBuilder currentMulti;
 
@@ -62,15 +74,34 @@ public class Pipeline extends MultiKeyPipelineBase implements Closeable {
     }
   }
 
+  /**
+   * @deprecated This will be removed in future.
+   * @param client
+   */
+  @Deprecated
   public void setClient(Client client) {
-    this.client = client;
+    if (this.resource == null) {
+      this.client = client;
+    }
   }
 
+  /**
+   * @deprecated This will be final in future.
+   * @param key
+   * @return 
+   */
+  @Deprecated
   @Override
   protected Client getClient(byte[] key) {
     return client;
   }
 
+  /**
+   * @deprecated This will be final in future.
+   * @param key
+   * @return 
+   */
+  @Deprecated
   @Override
   protected Client getClient(String key) {
     return client;
@@ -146,8 +177,7 @@ public class Pipeline extends MultiKeyPipelineBase implements Closeable {
     if (currentMulti != null) throw new JedisDataException("MULTI calls can not be nested");
 
     client.multi();
-    Response<String> response = getResponse(BuilderFactory.STRING); // Expecting
-    // OK
+    Response<String> response = getResponse(BuilderFactory.STRING); // Expecting OK
     currentMulti = new MultiResponseBuilder();
     return response;
   }
@@ -155,6 +185,8 @@ public class Pipeline extends MultiKeyPipelineBase implements Closeable {
   @Override
   public void close() {
     clear();
+    if (this.resource != null) {
+      this.resource.unsetDataSource();
+    }
   }
-
 }

@@ -8,7 +8,7 @@ import redis.clients.jedis.exceptions.JedisDataException;
 import redis.clients.jedis.exceptions.JedisException;
 import redis.clients.jedis.util.Pool;
 
-public class JedisBase<T extends JedisBase> implements BasicCommands, Closeable {
+public class JedisBase<J extends JedisBase> implements BasicCommands, Closeable {
 
   protected static final byte[][] DUMMY_ARRAY = new byte[0][];
 
@@ -16,7 +16,7 @@ public class JedisBase<T extends JedisBase> implements BasicCommands, Closeable 
   protected Transaction transaction = null;
   protected Pipeline pipeline = null;
 
-  private Pool<T> dataSource = null;
+  private Pool<J> dataSource = null;
 
   public JedisBase(Client client) {
     this.client = client;
@@ -87,20 +87,75 @@ public class JedisBase<T extends JedisBase> implements BasicCommands, Closeable 
   @Override
   public void close() {
     if (dataSource != null) {
-      Pool<T> pool = this.dataSource;
-      this.dataSource = null;
-      if (client.isBroken()) {
-        pool.returnBrokenResource((T) this);
-      } else {
-        pool.returnResource((T) this);
-      }
+      unsetDataSource();
     } else {
       client.close();
     }
   }
 
-  public void setDataSource(Pool<T> jedisPool) {
-    this.dataSource = jedisPool;
+  public void unsetDataSource() {
+    Pool<J> pool = this.dataSource;
+    if (pool != null) {
+      this.dataSource = null;
+      if (isBroken()) {
+         pool.returnBrokenResource((J) this);
+      } else {
+        pool.returnResource((J) this);
+      }
+    }
+  }
+
+  public void setDataSource(Pool<J> jedisPool) {
+    if (jedisPool != null) {
+      if (dataSource != null) {
+        throw new JedisException("Data source is already set.");
+      }
+      this.dataSource = jedisPool;
+      return;
+    }
+    throw new JedisException("Could not set data source.");
+  }
+
+  public void connect() {
+    client.connect();
+  }
+
+  public void disconnect() {
+    client.disconnect();
+  }
+
+  public void resetState() {
+    if (client.isConnected()) {
+      if (transaction != null) {
+        transaction.close();
+      }
+
+      if (pipeline != null) {
+        pipeline.close();
+      }
+
+      client.resetState();
+    }
+
+    transaction = null;
+    pipeline = null;
+  }
+
+  /**
+   * @deprecated Use {@link #startPipeline() Jedis.startPipeline()}
+   * @return 
+   */
+  @Deprecated
+  public Pipeline pipelined() {
+    pipeline = new Pipeline();
+    pipeline.setClient(client);
+    return pipeline;
+  }
+
+  public Pipeline startPipeline() {
+    checkIsInMultiOrPipeline();
+    pipeline = new Pipeline(this);
+    return pipeline;
   }
 
   /**
@@ -182,41 +237,6 @@ public class JedisBase<T extends JedisBase> implements BasicCommands, Closeable 
     return client.getStatusCodeReply();
   }
 
-  protected void checkIsInMultiOrPipeline() {
-    if (client.isInMulti()) {
-      throw new JedisDataException(
-          "Cannot use Jedis when in Multi. Please use Transaction or reset jedis state.");
-    } else if (pipeline != null && pipeline.hasPipelinedResponse()) {
-      throw new JedisDataException(
-          "Cannot use Jedis when in Pipeline. Please use Pipeline or reset jedis state .");
-    }
-  }
-
-  public void connect() {
-    client.connect();
-  }
-
-  public void disconnect() {
-    client.disconnect();
-  }
-
-  public void resetState() {
-    if (client.isConnected()) {
-      if (transaction != null) {
-        transaction.close();
-      }
-
-      if (pipeline != null) {
-        pipeline.close();
-      }
-
-      client.resetState();
-    }
-
-    transaction = null;
-    pipeline = null;
-  }
-
   /**
    * Request for authentication in a password protected Redis server. A Redis server can be
    * instructed to require a password before to allow clients to issue commands. This is done using
@@ -249,12 +269,6 @@ public class JedisBase<T extends JedisBase> implements BasicCommands, Closeable 
     checkIsInMultiOrPipeline();
     client.auth(user, password);
     return client.getStatusCodeReply();
-  }
-
-  public Pipeline pipelined() {
-    pipeline = new Pipeline();
-    pipeline.setClient(client);
-    return pipeline;
   }
 
   /**
@@ -561,6 +575,16 @@ public class JedisBase<T extends JedisBase> implements BasicCommands, Closeable 
       return client.getOne();
     } finally {
       client.rollbackTimeout();
+    }
+  }
+
+  protected void checkIsInMultiOrPipeline() {
+    if (client.isInMulti()) {
+      throw new JedisDataException(
+          "Cannot use Jedis when in Multi. Please use Transaction or reset jedis state.");
+    } else if (pipeline != null && pipeline.hasPipelinedResponse()) {
+      throw new JedisDataException(
+          "Cannot use Jedis when in Pipeline. Please use Pipeline or reset jedis state .");
     }
   }
 }
