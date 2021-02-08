@@ -8,7 +8,7 @@ import redis.clients.jedis.commands.ProtocolCommand;
 import redis.clients.jedis.exceptions.JedisException;
 import redis.clients.jedis.util.Pool;
 
-public class JedisBase<T extends JedisBase> implements BasicCommands, Closeable {
+public class JedisBase<J extends JedisBase> implements BasicCommands, Closeable {
 
   protected static final byte[][] DUMMY_ARRAY = new byte[0][];
 
@@ -16,7 +16,7 @@ public class JedisBase<T extends JedisBase> implements BasicCommands, Closeable 
   protected Transaction transaction = null;
   protected Pipeline pipeline = null;
 
-  private Pool<T> dataSource = null;
+  private Pool<J> dataSource = null;
 
   public JedisBase(Client client) {
     this.client = client;
@@ -56,18 +56,18 @@ public class JedisBase<T extends JedisBase> implements BasicCommands, Closeable 
   }
 
   protected void unsetDataSource() {
-    Pool<T> pool = this.dataSource;
+    Pool<J> pool = this.dataSource;
     if (pool != null) {
       this.dataSource = null;
       if (isBroken()) {
-        pool.returnBrokenResource((T) this);
+        pool.returnBrokenResource((J) this);
       } else {
-        pool.returnResource((T) this);
+        pool.returnResource((J) this);
       }
     }
   }
 
-  protected void setDataSource(Pool<T> jedisPool) {
+  protected void setDataSource(Pool<J> jedisPool) {
     if (jedisPool != null) {
       if (dataSource != null) {
         throw new JedisException("Data source is already set.");
@@ -76,6 +76,25 @@ public class JedisBase<T extends JedisBase> implements BasicCommands, Closeable 
       return;
     }
     throw new JedisException("Could not set data source.");
+  }
+
+  public Pipeline<J> beginPipelilning() {
+    checkIsInMultiOrPipeline();
+    pipeline = new Pipeline<>(this);
+    return pipeline;
+  }
+
+  public Transaction multi() {
+    client.multi();
+    client.getOne(); // expected OK
+    transaction = new Transaction(client);
+    return transaction;
+  }
+
+  public Transaction<J> beginTransaction() {
+    checkIsInMultiOrPipeline();
+    transaction = new Transaction<>(this);
+    return transaction;
   }
 
   /**
@@ -180,13 +199,6 @@ public class JedisBase<T extends JedisBase> implements BasicCommands, Closeable 
     checkIsInMultiOrPipeline();
     client.flushAll(flushMode);
     return client.getStatusCodeReply();
-  }
-
-  public Transaction multi() {
-    client.multi();
-    client.getOne(); // expected OK
-    transaction = new Transaction(client);
-    return transaction;
   }
 
   protected void checkIsInMultiOrPipeline() {

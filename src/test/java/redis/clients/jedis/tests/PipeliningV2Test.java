@@ -37,7 +37,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
 
   @Test
   public void pipeline() {
-    Pipeline p = jedis.startPipeline();
+    Pipeline p = jedis.beginPipelilning();
     p.set("foo", "bar");
     p.get("foo");
     List<Object> results = p.syncAndReturnAll();
@@ -58,7 +58,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
     byte[] bytesForSetRange = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     jedis.setrange("setrangebytes".getBytes(), 0, bytesForSetRange);
 
-    Pipeline p = jedis.startPipeline();
+    Pipeline p = jedis.beginPipelilning();
     Response<String> string = p.get("string");
     Response<String> list = p.lpop("list");
     Response<String> hash = p.hget("hash", "foo");
@@ -99,7 +99,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
     jedis.hset("key".getBytes(), "f1".getBytes(), "v111".getBytes());
     jedis.hset("key".getBytes(), "f22".getBytes(), "v2222".getBytes());
 
-    Pipeline p = jedis.startPipeline();
+    Pipeline p = jedis.beginPipelilning();
     Response<Map<byte[], byte[]>> fmap = p.hgetAll("key".getBytes());
     Response<Set<byte[]>> fkeys = p.hkeys("key".getBytes());
     Response<List<byte[]>> fordered = p.hmget("key".getBytes(), "f22".getBytes(), "f1".getBytes());
@@ -151,7 +151,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
 
   @Test
   public void pipelineSelect() {
-    Pipeline p = jedis.startPipeline();
+    Pipeline p = jedis.beginPipelilning();
     p.select(1);
     p.sync();
   }
@@ -160,7 +160,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
   public void pipelineResponseWithData() {
     jedis.zadd("zset", 1, "foo");
 
-    Pipeline p = jedis.startPipeline();
+    Pipeline p = jedis.beginPipelilning();
     Response<Double> score = p.zscore("zset", "foo");
     p.sync();
 
@@ -171,7 +171,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
   public void pipelineResponseWithoutData() {
     jedis.zadd("zset", 1, "foo");
 
-    Pipeline p = jedis.startPipeline();
+    Pipeline p = jedis.beginPipelilning();
     Response<Double> score = p.zscore("zset", "bar");
     p.sync();
 
@@ -182,7 +182,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
   public void pipelineResponseWithinPipeline() {
     jedis.set("string", "foo");
 
-    Pipeline p = jedis.startPipeline();
+    Pipeline p = jedis.beginPipelilning();
     Response<String> string = p.get("string");
     string.get();
     p.sync();
@@ -190,7 +190,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
 
   @Test
   public void pipelineWithPubSub() {
-    Pipeline pipelined = jedis.startPipeline();
+    Pipeline pipelined = jedis.beginPipelilning();
     Response<Long> p1 = pipelined.publish("foo", "bar");
     Response<Long> p2 = pipelined.publish("foo".getBytes(), "bar".getBytes());
     pipelined.sync();
@@ -200,7 +200,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
 
   @Test
   public void canRetrieveUnsetKey() {
-    Pipeline p = jedis.startPipeline();
+    Pipeline p = jedis.beginPipelilning();
     Response<String> shouldNotExist = p.get(UUID.randomUUID().toString());
     p.sync();
     assertNull(shouldNotExist.get());
@@ -208,7 +208,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
 
   @Test
   public void piplineWithError() {
-    Pipeline p = jedis.startPipeline();
+    Pipeline p = jedis.beginPipelilning();
     p.set("foo", "bar");
     Response<Set<String>> error = p.smembers("foo");
     Response<String> r = p.get("foo");
@@ -224,7 +224,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
 
   @Test
   public void multi() {
-    Pipeline p = jedis.startPipeline();
+    Pipeline p = jedis.beginPipelilning();
     p.multi();
     Response<Long> r1 = p.hincrBy("a", "f1", -1);
     Response<Long> r2 = p.hincrBy("a", "f1", -2);
@@ -253,7 +253,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
 
   @Test
   public void multiWithMassiveRequests() {
-    Pipeline p = jedis.startPipeline();
+    Pipeline p = jedis.beginPipelilning();
     p.multi();
 
     List<Response<?>> responseList = new ArrayList<Response<?>>();
@@ -279,7 +279,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
     jedis.set("foo", "314");
     jedis.set("bar", "foo");
     jedis.set("hello", "world");
-    Pipeline p = jedis.startPipeline();
+    Pipeline p = jedis.beginPipelilning();
     Response<String> r1 = p.get("bar");
     p.multi();
     Response<String> r2 = p.get("foo");
@@ -303,7 +303,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
     List<Object> expect = new ArrayList<>();
     List<Object> expMulti = null; // MULTI will fail
 
-    Pipeline pipe = jedis.startPipeline();
+    Pipeline pipe = jedis.beginPipelilning();
     pipe.watch(key);        expect.add("OK");
     pipe.incrBy(key, 3L);   expect.add(8L);
     pipe.multi();           expect.add("OK");
@@ -328,7 +328,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
     List<Object> expect = new ArrayList<>();
     List<Object> expMulti = new ArrayList<>();
 
-    Pipeline pipe = jedis.startPipeline();
+    Pipeline pipe = jedis.beginPipelilning();
     pipe.watch(key);        expect.add("OK");
     pipe.incrBy(key, 3L);   expect.add(8L);
     pipe.unwatch();         expect.add("OK");
@@ -348,19 +348,19 @@ public class PipeliningV2Test extends JedisCommandTestBase {
 
   @Test(expected = JedisDataException.class)
   public void pipelineExecShoudThrowJedisDataExceptionWhenNotInMulti() {
-    Pipeline pipeline = jedis.startPipeline();
+    Pipeline pipeline = jedis.beginPipelilning();
     pipeline.exec();
   }
 
   @Test(expected = JedisDataException.class)
   public void pipelineDiscardShoudThrowJedisDataExceptionWhenNotInMulti() {
-    Pipeline pipeline = jedis.startPipeline();
+    Pipeline pipeline = jedis.beginPipelilning();
     pipeline.discard();
   }
 
   @Test(expected = JedisDataException.class)
   public void pipelineMultiShoudThrowJedisDataExceptionWhenAlreadyInMulti() {
-    Pipeline pipeline = jedis.startPipeline();
+    Pipeline pipeline = jedis.beginPipelilning();
     pipeline.multi();
     pipeline.set("foo", "3");
     pipeline.multi();
@@ -368,7 +368,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
 
   @Test(expected = JedisDataException.class)
   public void testJedisThowExceptionWhenInPipeline() {
-    Pipeline pipeline = jedis.startPipeline();
+    Pipeline pipeline = jedis.beginPipelilning();
     pipeline.set("foo", "3");
     jedis.get("somekey");
     fail("Can't use jedis instance when in Pipeline");
@@ -376,7 +376,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
 
   @Test
   public void testReuseJedisWhenPipelineIsEmpty() {
-    Pipeline pipeline = jedis.startPipeline();
+    Pipeline pipeline = jedis.beginPipelilning();
     pipeline.set("foo", "3");
     pipeline.sync();
     String result = jedis.get("foo");
@@ -385,7 +385,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
 
   @Test
   public void testResetStateWhenInPipeline() {
-    Pipeline pipeline = jedis.startPipeline();
+    Pipeline pipeline = jedis.beginPipelilning();
     pipeline.set("foo", "3");
     jedis.resetState();
     String result = jedis.get("foo");
@@ -394,7 +394,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
 
   @Test
   public void testDiscardInPipeline() {
-    Pipeline pipeline = jedis.startPipeline();
+    Pipeline pipeline = jedis.beginPipelilning();
     pipeline.multi();
     pipeline.set("foo", "bar");
     Response<String> discard = pipeline.discard();
@@ -408,7 +408,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
   public void testEval() {
     String script = "return 'success!'";
 
-    Pipeline p = jedis.startPipeline();
+    Pipeline p = jedis.beginPipelilning();
     Response<Object> result = p.eval(script);
     p.sync();
 
@@ -419,7 +419,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
   public void testEvalWithBinary() {
     String script = "return 'success!'";
 
-    Pipeline p = jedis.startPipeline();
+    Pipeline p = jedis.beginPipelilning();
     Response<Object> result = p.eval(SafeEncoder.encode(script));
     p.sync();
 
@@ -432,7 +432,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
     String arg = "3";
     String script = "redis.call('INCRBY', KEYS[1], ARGV[1]) redis.call('INCRBY', KEYS[1], ARGV[1])";
 
-    Pipeline p = jedis.startPipeline();
+    Pipeline p = jedis.beginPipelilning();
     p.set(key, "0");
     Response<Object> result0 = p.eval(script, Arrays.asList(key), Arrays.asList(arg));
     p.incr(key);
@@ -453,7 +453,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
     byte[] bScript = SafeEncoder
         .encode("redis.call('INCRBY', KEYS[1], ARGV[1]) redis.call('INCRBY', KEYS[1], ARGV[1])");
 
-    Pipeline bP = jedis.startPipeline();
+    Pipeline bP = jedis.beginPipelilning();
     bP.set(bKey, SafeEncoder.encode("0"));
     Response<Object> bResult0 = bP.eval(bScript, Arrays.asList(bKey), Arrays.asList(bArg));
     bP.incr(bKey);
@@ -470,7 +470,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
   public void testEvalNestedLists() {
     String script = "return { {KEYS[1]} , {2} }";
 
-    Pipeline p = jedis.startPipeline();
+    Pipeline p = jedis.beginPipelilning();
     Response<Object> result = p.eval(script, 1, "key1");
     p.sync();
 
@@ -484,7 +484,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
     byte[] bScript = SafeEncoder.encode("return { {KEYS[1]} , {2} }");
     byte[] bKey = SafeEncoder.encode("key1");
 
-    Pipeline p = jedis.startPipeline();
+    Pipeline p = jedis.beginPipelilning();
     Response<Object> result = p.eval(bScript, 1, bKey);
     p.sync();
 
@@ -500,7 +500,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
 
     assertTrue(jedis.scriptExists(sha1));
 
-    Pipeline p = jedis.startPipeline();
+    Pipeline p = jedis.beginPipelilning();
     Response<Object> result = p.evalsha(sha1);
     p.sync();
 
@@ -516,7 +516,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
 
     assertTrue(jedis.scriptExists(sha1));
 
-    Pipeline p = jedis.startPipeline();
+    Pipeline p = jedis.beginPipelilning();
     p.set(key, "0");
     Response<Object> result0 = p.evalsha(sha1, Arrays.asList(key), Arrays.asList(arg));
     p.incr(key);
@@ -539,7 +539,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
 
     assertTrue(jedis.scriptExists(bSha1) == 1);
 
-    Pipeline p = jedis.startPipeline();
+    Pipeline p = jedis.beginPipelilning();
     p.set(bKey, SafeEncoder.encode("0"));
     Response<Object> result0 = p.evalsha(bSha1, Arrays.asList(bKey), Arrays.asList(bArg));
     p.incr(bKey);
@@ -586,7 +586,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
     jedis.hmset(key3, hashMap);
     jedis.hmset(key4, hashMap1);
 
-    Pipeline pipeline = jedis.startPipeline();
+    Pipeline pipeline = jedis.beginPipelilning();
     pipeline.multi();
 
     pipeline.get(key1);
@@ -623,14 +623,14 @@ public class PipeliningV2Test extends JedisCommandTestBase {
     // we need to test with fresh instance of Jedis
     Jedis jedis2 = new Jedis(hnp.getHost(), hnp.getPort(), 500);
 
-    Pipeline pipeline = jedis2.startPipeline();
+    Pipeline pipeline = jedis2.beginPipelilning();
     pipeline.sync();
 
     jedis2.close();
 
     jedis2 = new Jedis(hnp.getHost(), hnp.getPort(), 500);
 
-    pipeline = jedis2.startPipeline();
+    pipeline = jedis2.beginPipelilning();
     List<Object> resp = pipeline.syncAndReturnAll();
     assertTrue(resp.isEmpty());
 
@@ -643,7 +643,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
     Jedis jedis2 = new Jedis(hnp.getHost(), hnp.getPort(), 500);
     jedis2.auth("foobared");
 
-    Pipeline pipeline = jedis2.startPipeline();
+    Pipeline pipeline = jedis2.beginPipelilning();
     Response<String> retFuture1 = pipeline.set("a", "1");
     Response<String> retFuture2 = pipeline.set("b", "2");
 
@@ -661,7 +661,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
     Jedis jedis2 = new Jedis(hnp.getHost(), hnp.getPort(), 500);
     jedis2.auth("foobared");
 
-    Pipeline pipeline = jedis2.startPipeline();
+    Pipeline pipeline = jedis2.beginPipelilning();
     Response<String> retFuture1 = pipeline.set("a", "1");
     Response<String> retFuture2 = pipeline.set("b", "2");
 

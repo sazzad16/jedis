@@ -995,4 +995,22 @@ public class StreamsCommandsTest extends JedisCommandTestBase {
     assertEquals(id2.get(), entries.get(1).getID());
     assertEquals(map, entries.get(1).getFields());
   }
+
+  @Test
+  public void transactionV2() {
+    Map<String,String> map = new HashMap<>();
+    map.put("a", "b");
+    Transaction t = jedis.beginTransaction();
+    Response<StreamEntryID> id1 = t.xadd("stream1", StreamEntryID.NEW_ENTRY, map);
+    Response<StreamEntryID> id2 = t.xadd("stream1", StreamEntryID.NEW_ENTRY, map);
+    Response<List<StreamEntry>> results = t.xrange("stream1", null, null, 2);
+    t.exec();
+
+    List<StreamEntry> entries = results.get();
+    assertEquals(2, entries.size());
+    assertEquals(id1.get(), entries.get(0).getID());
+    assertEquals(map, entries.get(0).getFields());
+    assertEquals(id2.get(), entries.get(1).getID());
+    assertEquals(map, entries.get(1).getFields());
+  }
 }

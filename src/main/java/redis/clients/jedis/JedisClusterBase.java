@@ -4,6 +4,7 @@ import java.io.Closeable;
 import java.time.Duration;
 import java.util.Map;
 import redis.clients.jedis.commands.ProtocolCommand;
+import redis.clients.jedis.util.JedisClusterCRC16;
 
 public class JedisClusterBase<J extends JedisBase, P extends JedisPoolBase<J>,
     H extends AbstractJedisClusterConnectionHandler<J, P>> implements Closeable {
@@ -51,6 +52,30 @@ public class JedisClusterBase<J extends JedisBase, P extends JedisPoolBase<J>,
 
   public J getConnectionFromSlot(int slot) {
     return this.connectionHandler.getConnectionFromSlot(slot);
+  }
+
+  public Pipeline<J> beginPipelining(int hashSlot) {
+    return this.connectionHandler.getConnectionFromSlot(hashSlot).beginPipelilning();
+  }
+
+  public Pipeline<J> beginPipelining(byte[] sampleKey) {
+    return beginPipelining(JedisClusterCRC16.getSlot(sampleKey));
+  }
+
+  public Pipeline<J> beginPipelining(String sampleKey) {
+    return beginPipelining(JedisClusterCRC16.getSlot(sampleKey));
+  }
+
+  public Transaction<J> beginTransaction(int hashSlot) {
+    return this.connectionHandler.getConnectionFromSlot(hashSlot).beginTransaction();
+  }
+
+  public Transaction<J> beginTransaction(byte[] sampleKey) {
+    return beginTransaction(JedisClusterCRC16.getSlot(sampleKey));
+  }
+
+  public Transaction<J> beginTransaction(String sampleKey) {
+    return beginTransaction(JedisClusterCRC16.getSlot(sampleKey));
   }
 
   public Object sendCommand(final byte[] sampleKey, final ProtocolCommand cmd, final byte[]... args) {
