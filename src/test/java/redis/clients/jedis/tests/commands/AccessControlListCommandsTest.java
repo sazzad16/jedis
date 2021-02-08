@@ -382,11 +382,11 @@ public class AccessControlListCommandsTest extends JedisCommandTestBase {
 
     jedis.auth("antirez", "foo");
     Transaction t = jedis.multi();
-      t.incr("foo");
-      try{
-        t.exec();
-        fail("Should have thrown an JedisAccessControlException: user does not have the permission to incr(\"foo\")");
-      } catch (Exception e){}
+    t.incr("foo");
+    try{
+      t.exec();
+      fail("Should have thrown an JedisAccessControlException: user does not have the permission to incr(\"foo\")");
+    } catch (Exception e){}
     t.close();
 
     jedis.auth("default", "foobared");

@@ -69,6 +69,11 @@ public abstract class AbstractJedisFactory<J extends JedisBase> implements Poole
   }
 
   @Override
+  public void activateObject(PooledObject<J> pooledJedis) throws Exception {
+    // select db ?
+  }
+
+  @Override
   public void passivateObject(PooledObject<J> pooledJedis) throws Exception {
     // TODO maybe should select db 0? Not sure right now.
   }

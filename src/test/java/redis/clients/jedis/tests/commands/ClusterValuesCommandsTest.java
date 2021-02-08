@@ -94,15 +94,6 @@ public class ClusterValuesCommandsTest extends ClusterJedisCommandsTestBase {
   }
 
   @Test
-  public void pipelineSelect() {
-    try (Pipeline p = jedisCluster.beginPipelining("select")) {
-      p.select(1);
-      List<Object> resp = p.syncAndReturnAll();
-      assertEquals(JedisDataException.class, resp.get(0).getClass());
-    }
-  }
-
-  @Test
   public void pipelineResponseWithData() {
     jedisCluster.zadd("zset", 1, "foo");
 
@@ -138,7 +129,7 @@ public class ClusterValuesCommandsTest extends ClusterJedisCommandsTestBase {
   }
 
   @Test
-  public void multi() {
+  public void transaction() {
     try (Transaction trans = jedisCluster.beginTransaction("foo")) {
       trans.sadd("foo", "a");
       trans.sadd("foo", "b");
@@ -155,7 +146,7 @@ public class ClusterValuesCommandsTest extends ClusterJedisCommandsTestBase {
   }
 
   @Test
-  public void discard() {
+  public void transactionDiscard() {
     try (Transaction t = jedisCluster.beginTransaction("")) {
       String status = t.discard();
       assertEquals("OK", status);
@@ -215,7 +206,7 @@ public class ClusterValuesCommandsTest extends ClusterJedisCommandsTestBase {
   }
 
   @Test
-  public void execGetResponse() {
+  public void transactionExecGetResponse() {
     Transaction t = jedisCluster.beginTransaction("foo");
 
     t.set("foo", "bar");
@@ -233,7 +224,7 @@ public class ClusterValuesCommandsTest extends ClusterJedisCommandsTestBase {
   }
 
   @Test
-  public void testCloseable() throws IOException {
+  public void transactionCloseable() throws IOException {
 //    // we need to test with fresh instance of Jedis
 //    Jedis jedis2 = new Jedis(hnp.getHost(), hnp.getPort(), 500);
 //    jedis2.auth("foobared");

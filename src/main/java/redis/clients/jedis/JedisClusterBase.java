@@ -26,6 +26,10 @@ public class JedisClusterBase<J extends JedisBase, P extends JedisPoolBase<J>,
     public JedisClusterCommand(H connectionHandler, int maxAttempts) {
       super(connectionHandler, maxAttempts);
     }
+
+    public JedisClusterCommand() {
+      super(connectionHandler, maxAttempts);
+    }
   }
 
   @Override
@@ -42,7 +46,7 @@ public class JedisClusterBase<J extends JedisBase, P extends JedisPoolBase<J>,
   }
 
   public Pipeline<J> beginPipelining(int hashSlot) {
-    return this.connectionHandler.getConnectionFromSlot(hashSlot).beginPipelilning();
+    return this.connectionHandler.getConnectionFromSlot(hashSlot).beginPipelining();
   }
 
   public Pipeline<J> beginPipelining(byte[] sampleKey) {
