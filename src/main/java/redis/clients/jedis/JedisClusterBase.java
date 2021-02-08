@@ -41,16 +41,28 @@ public class JedisClusterBase<J extends JedisBase, P extends JedisPoolBase<J>,
     return this.connectionHandler.getConnectionFromSlot(slot);
   }
 
-  public Pipeline startPipeline(int hashSlot) {
-    return this.connectionHandler.getConnectionFromSlot(hashSlot).startPipeline();
+  public Pipeline<J> beginPipelining(int hashSlot) {
+    return this.connectionHandler.getConnectionFromSlot(hashSlot).beginPipelilning();
   }
 
-  public Pipeline startPipeline(byte[] sampleKey) {
-    return startPipeline(JedisClusterCRC16.getSlot(sampleKey));
+  public Pipeline<J> beginPipelining(byte[] sampleKey) {
+    return beginPipelining(JedisClusterCRC16.getSlot(sampleKey));
   }
 
-  public Pipeline startPipeline(String sampleKey) {
-    return startPipeline(JedisClusterCRC16.getSlot(sampleKey));
+  public Pipeline<J> beginPipelining(String sampleKey) {
+    return beginPipelining(JedisClusterCRC16.getSlot(sampleKey));
+  }
+
+  public Transaction<J> beginTransaction(int hashSlot) {
+    return this.connectionHandler.getConnectionFromSlot(hashSlot).beginTransaction();
+  }
+
+  public Transaction<J> beginTransaction(byte[] sampleKey) {
+    return beginTransaction(JedisClusterCRC16.getSlot(sampleKey));
+  }
+
+  public Transaction<J> beginTransaction(String sampleKey) {
+    return beginTransaction(JedisClusterCRC16.getSlot(sampleKey));
   }
 
   public Object sendCommand(final byte[] sampleKey, final ProtocolCommand cmd, final byte[]... args) {

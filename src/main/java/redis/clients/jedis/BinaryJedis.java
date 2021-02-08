@@ -1942,13 +1942,6 @@ public class BinaryJedis extends JedisBase implements BasicCommands, BinaryJedis
     return getTupledSet();
   }
 
-  public Transaction multi() {
-    client.multi();
-    client.getOne(); // expected OK
-    transaction = new Transaction(client);
-    return transaction;
-  }
-
   @Override
   public String watch(final byte[]... keys) {
     checkIsInMultiOrPipeline();

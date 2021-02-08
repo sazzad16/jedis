@@ -152,10 +152,23 @@ public class JedisBase<J extends JedisBase> implements BasicCommands, Closeable 
     return pipeline;
   }
 
-  public Pipeline startPipeline() {
+  public Pipeline<J> beginPipelilning() {
     checkIsInMultiOrPipeline();
-    pipeline = new Pipeline(this);
+    pipeline = new Pipeline<>(this);
     return pipeline;
+  }
+
+  public Transaction multi() {
+    client.multi();
+    client.getOne(); // expected OK
+    transaction = new Transaction(client);
+    return transaction;
+  }
+
+  public Transaction<J> beginTransaction() {
+    checkIsInMultiOrPipeline();
+    transaction = new Transaction<>(this);
+    return transaction;
   }
 
   /**
