@@ -36,7 +36,7 @@ public abstract class AbstractJedisFactory<J extends JedisBase> implements Poole
 
   @Override
   public void activateObject(PooledObject<J> pooledJedis) throws Exception {
-    //
+    // select db ?
   }
 
   @Override

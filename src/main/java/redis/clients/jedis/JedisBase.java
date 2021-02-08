@@ -78,7 +78,7 @@ public class JedisBase<J extends JedisBase> implements BasicCommands, Closeable 
     throw new JedisException("Could not set data source.");
   }
 
-  public Pipeline<J> beginPipelilning() {
+  public Pipeline<J> beginPipelining() {
     checkIsInMultiOrPipeline();
     pipeline = new Pipeline<>(this);
     return pipeline;

@@ -1,8 +1,5 @@
 package redis.clients.jedis.tests.commands;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.junit.After;
 import org.junit.Before;
 

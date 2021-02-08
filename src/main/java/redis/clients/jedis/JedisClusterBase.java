@@ -37,7 +37,7 @@ public class JedisClusterBase<J extends JedisBase, P extends JedisPoolBase<J>,
   public abstract class JedisClusterCommand<T> extends AbstractJedisClusterCommand<T, J> {
 
     public JedisClusterCommand() {
-      super(connectionHandler, maxAttempts);
+      super(connectionHandler, maxAttempts, maxTotalRetriesDuration);
     }
   }
 
@@ -55,7 +55,7 @@ public class JedisClusterBase<J extends JedisBase, P extends JedisPoolBase<J>,
   }
 
   public Pipeline<J> beginPipelining(int hashSlot) {
-    return this.connectionHandler.getConnectionFromSlot(hashSlot).beginPipelilning();
+    return this.connectionHandler.getConnectionFromSlot(hashSlot).beginPipelining();
   }
 
   public Pipeline<J> beginPipelining(byte[] sampleKey) {
