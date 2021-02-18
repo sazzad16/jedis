@@ -1,26 +1,22 @@
 package redis.clients.jedis;
 
-import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.List;
 
 import redis.clients.jedis.exceptions.JedisDataException;
 
-public class Pipeline<J extends JedisBase> extends MultiKeyPipelineBase implements Closeable {
-
-  private final J resource;
+public class Pipeline<J extends JedisBase> extends MultiKeyPipelineBase<J> {
 
   /**
    * @deprecated This constructor will be removed in future.
    */
   @Deprecated
   public Pipeline() {
-    this.resource = null;
+    this(null);
   }
 
   public Pipeline(J resource) {
-    this.resource = resource;
-    this.client = resource.getClient();
+    super(resource);
   }
 
   private MultiResponseBuilder currentMulti;
@@ -66,51 +62,19 @@ public class Pipeline<J extends JedisBase> extends MultiKeyPipelineBase implemen
   }
 
   @Override
-  protected <T> Response<T> getResponse(Builder<T> builder) {
+  protected <T> Response<T> enqueResponse(Builder<T> builder) {
     if (currentMulti != null) {
-      super.getResponse(BuilderFactory.STRING); // Expected QUEUED
+      super.enqueResponse(BuilderFactory.STRING); // Expected QUEUED
 
       Response<T> lr = new Response<>(builder);
       currentMulti.addResponse(lr);
       return lr;
     } else {
-      return super.getResponse(builder);
+      return super.enqueResponse(builder);
     }
   }
 
-  /**
-   * @deprecated This will be removed in future.
-   * @param client
-   */
-  @Deprecated
-  public void setClient(Client client) {
-    if (this.resource == null) {
-      this.client = client;
-    }
-  }
-
-  /**
-   * @deprecated This will be final in future.
-   * @param key
-   * @return
-   */
-  @Deprecated
   @Override
-  protected Client getClient(byte[] key) {
-    return client;
-  }
-
-  /**
-   * @deprecated This will be final in future.
-   * @param key
-   * @return
-   */
-  @Deprecated
-  @Override
-  protected Client getClient(String key) {
-    return client;
-  }
-
   public void clear() {
     if (isInMulti()) {
       discard();
@@ -130,7 +94,7 @@ public class Pipeline<J extends JedisBase> extends MultiKeyPipelineBase implemen
    */
   public void sync() {
     if (getPipelinedResponseLength() > 0) {
-      List<Object> unformatted = client.getMany(getPipelinedResponseLength());
+      List<Object> unformatted = getClient().getMany(getPipelinedResponseLength());
       for (Object o : unformatted) {
         generateResponse(o);
       }
@@ -141,11 +105,12 @@ public class Pipeline<J extends JedisBase> extends MultiKeyPipelineBase implemen
    * Synchronize pipeline by reading all responses. This operation close the pipeline. Whenever
    * possible try to avoid using this version and use Pipeline.sync() as it won't go through all the
    * responses and generate the right response type (usually it is a waste of time).
+   *
    * @return A list of all the responses in the order you executed them.
    */
   public List<Object> syncAndReturnAll() {
     if (getPipelinedResponseLength() > 0) {
-      List<Object> unformatted = client.getMany(getPipelinedResponseLength());
+      List<Object> unformatted = getClient().getMany(getPipelinedResponseLength());
       List<Object> formatted = new ArrayList<>();
       for (Object o : unformatted) {
         try {
@@ -161,37 +126,30 @@ public class Pipeline<J extends JedisBase> extends MultiKeyPipelineBase implemen
   }
 
   public Response<String> discard() {
-    if (currentMulti == null) throw new JedisDataException("DISCARD without MULTI");
+    if (!isInMulti()) throw new JedisDataException("DISCARD without MULTI");
 
-    client.discard();
+    getClient().discard();
     currentMulti = null;
-    return getResponse(BuilderFactory.STRING);
+    return enqueResponse(BuilderFactory.STRING);
   }
 
   public Response<List<Object>> exec() {
-    if (currentMulti == null) throw new JedisDataException("EXEC without MULTI");
+    if (!isInMulti()) throw new JedisDataException("EXEC without MULTI");
 
-    client.exec();
-    Response<List<Object>> response = super.getResponse(currentMulti);
+    getClient().exec();
+    Response<List<Object>> response = super.enqueResponse(currentMulti);
     currentMulti.setResponseDependency(response);
     currentMulti = null;
     return response;
   }
 
   public Response<String> multi() {
-    if (currentMulti != null) throw new JedisDataException("MULTI calls can not be nested");
+    if (isInMulti()) throw new JedisDataException("MULTI calls can not be nested");
 
-    client.multi();
-    Response<String> response = getResponse(BuilderFactory.STRING); // Expecting OK
+    getClient().multi();
+    Response<String> response = enqueResponse(BuilderFactory.STRING); // Expecting OK
     currentMulti = new MultiResponseBuilder();
     return response;
   }
 
-  @Override
-  public void close() {
-    clear();
-    if (this.resource != null) {
-      this.resource.unsetDataSource();
-    }
-  }
 }

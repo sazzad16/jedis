@@ -4,7 +4,8 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class Queable {
-  private Queue<Response<?>> pipelinedResponses = new LinkedList<>();
+
+  private final Queue<Response<?>> pipelinedResponses = new LinkedList<>();
 
   protected void clean() {
     pipelinedResponses.clear();
@@ -18,10 +19,18 @@ public class Queable {
     return response;
   }
 
-  protected <T> Response<T> getResponse(Builder<T> builder) {
+  protected <T> Response<T> enqueResponse(Builder<T> builder) {
     Response<T> lr = new Response<>(builder);
     pipelinedResponses.add(lr);
     return lr;
+  }
+
+  /**
+   * @deprecated Use {@link #enqueResponse(redis.clients.jedis.Builder)}.
+   */
+  @Deprecated
+  protected <T> Response<T> getResponse(Builder<T> builder) {
+    return enqueResponse(builder);
   }
 
   protected boolean hasPipelinedResponse() {

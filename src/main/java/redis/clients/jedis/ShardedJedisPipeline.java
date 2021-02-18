@@ -5,10 +5,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-public class ShardedJedisPipeline extends PipelineBase {
+public class ShardedJedisPipeline extends PipelineKeyedBase {
   private BinaryShardedJedis jedis;
   private List<FutureResult> results = new ArrayList<>();
   private Queue<Client> clients = new LinkedList<>();
+
+  public ShardedJedisPipeline() {
+    super(null);
+  }
 
   private static class FutureResult {
     private Client client;
@@ -32,6 +36,10 @@ public class ShardedJedisPipeline extends PipelineBase {
       r.add(fr.get());
     }
     return r;
+  }
+
+  @Override
+  protected void clear() {
   }
 
   /**
