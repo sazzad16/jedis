@@ -178,7 +178,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
     assertNull(score.get());
   }
 
-  @Test(expected = JedisDataException.class)
+  @Test(expected = IllegalStateException.class)
   public void pipelineResponseWithinPipeline() {
     jedis.set("string", "foo");
 
@@ -346,19 +346,19 @@ public class PipeliningV2Test extends JedisCommandTestBase {
     assertEquals(expect, pipe.syncAndReturnAll());
   }
 
-  @Test(expected = JedisDataException.class)
+  @Test(expected = IllegalStateException.class)
   public void pipelineExecShoudThrowJedisDataExceptionWhenNotInMulti() {
     Pipeline pipeline = jedis.beginPipelining();
     pipeline.exec();
   }
 
-  @Test(expected = JedisDataException.class)
+  @Test(expected = IllegalStateException.class)
   public void pipelineDiscardShoudThrowJedisDataExceptionWhenNotInMulti() {
     Pipeline pipeline = jedis.beginPipelining();
     pipeline.discard();
   }
 
-  @Test(expected = JedisDataException.class)
+  @Test(expected = IllegalStateException.class)
   public void pipelineMultiShoudThrowJedisDataExceptionWhenAlreadyInMulti() {
     Pipeline pipeline = jedis.beginPipelining();
     pipeline.multi();
@@ -366,7 +366,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
     pipeline.multi();
   }
 
-  @Test(expected = JedisDataException.class)
+  @Test(expected = IllegalStateException.class)
   public void testJedisThowExceptionWhenInPipeline() {
     Pipeline pipeline = jedis.beginPipelining();
     pipeline.set("foo", "3");
@@ -675,7 +675,7 @@ public class PipeliningV2Test extends JedisCommandTestBase {
     try {
       pipeline.exec();
       fail("close should discard transaction");
-    } catch (JedisDataException e) {
+    } catch (IllegalStateException e) {
       assertTrue(e.getMessage().contains("EXEC without MULTI"));
       // pass
     }

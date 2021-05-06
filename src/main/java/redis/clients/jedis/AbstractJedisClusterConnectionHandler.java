@@ -78,7 +78,7 @@ public abstract class AbstractJedisClusterConnectionHandler<J extends JedisBase,
       }
     }
 
-    JedisNoReachableClusterNodeException noReachableNode = new JedisNoReachableClusterNodeException("No reachable node in cluster");
+    JedisNoReachableClusterNodeException noReachableNode = new JedisNoReachableClusterNodeException("No reachable node in cluster.");
     if (suppressed != null) {
       noReachableNode.addSuppressed(suppressed);
     }

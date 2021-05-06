@@ -307,11 +307,6 @@ public class BinaryJedis<J extends BinaryJedis> extends JedisBase<J> implements 
   }
 
   @Override
-  public void close() {
-    client.close();
-  }
-
-  @Override
   public int getDB() {
     return client.getDB();
   }

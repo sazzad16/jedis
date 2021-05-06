@@ -117,7 +117,7 @@ public class ClusterValuesCommandsTest extends ClusterJedisCommandsTestBase {
     }
   }
 
-  @Test(expected = JedisDataException.class)
+  @Test(expected = IllegalStateException.class)
   public void pipelineResponseWithinPipeline() {
     jedisCluster.set("string", "foo");
 
@@ -177,7 +177,7 @@ public class ClusterValuesCommandsTest extends ClusterJedisCommandsTestBase {
     }
   }
 
-  @Test(expected = JedisDataException.class)
+  @Test(expected = IllegalStateException.class)
   public void transactionResponseWithinPipeline() {
     jedisCluster.set("string", "foo");
 
@@ -225,11 +225,6 @@ public class ClusterValuesCommandsTest extends ClusterJedisCommandsTestBase {
 
   @Test
   public void transactionCloseable() throws IOException {
-//    // we need to test with fresh instance of Jedis
-//    Jedis jedis2 = new Jedis(hnp.getHost(), hnp.getPort(), 500);
-//    jedis2.auth("foobared");
-
-//    Transaction transaction = jedis2.beginTransaction();
     Transaction transaction = jedisCluster.beginTransaction("{c}");
     transaction.set("{c}a", "1");
     transaction.set("{c}b", "2");

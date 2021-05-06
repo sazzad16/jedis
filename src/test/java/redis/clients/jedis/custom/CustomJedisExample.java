@@ -30,6 +30,10 @@ public class CustomJedisExample {
 
     public CustomJedis(HostAndPort hp, JedisClientConfig clientConfig) {
       super(hp, clientConfig);
+      String password = clientConfig.getPassword();
+      if (password != null) {
+        auth(password);
+      }
     }
 
     @Override

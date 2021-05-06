@@ -1,7 +1,5 @@
 package redis.clients.jedis.custom;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.Collections;
 import org.junit.Test;
 import redis.clients.jedis.DefaultJedisClientConfig;

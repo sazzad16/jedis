@@ -92,24 +92,28 @@ public class JedisTest extends JedisCommandTestBase {
 
   @Test
   public void timeoutConnection() throws Exception {
-    Jedis jedis = new Jedis("localhost", 6379, 15000);
-    jedis.auth("foobared");
-    String timeout = jedis.configGet("timeout").get(1);
-    jedis.configSet("timeout", "1");
-    Thread.sleep(2000);
-    try {
-      jedis.hmget("foobar", "foo");
-      fail("Operation should throw JedisConnectionException");
-    } catch (JedisConnectionException jce) {
-      // expected
+    String timeout = null;
+    try (Jedis jedis = new Jedis("localhost", 6379, 15000)) {
+      jedis.auth("foobared");
+      timeout = jedis.configGet("timeout").get(1);
+      jedis.configSet("timeout", "1");
+      Thread.sleep(2000);
+      try {
+        jedis.hmget("foobar", "foo");
+        fail("Operation should throw JedisConnectionException");
+      } catch (JedisConnectionException jce) {
+        // expected
+      }
+    } finally {
+      // reset config
+      if (timeout != null) {
+        try (Jedis jedis = new Jedis("localhost", 6379)) {
+          jedis.auth("foobared");
+          jedis.configSet("timeout", timeout);
+          jedis.close();
+        }
+      }
     }
-    jedis.close();
-
-    // reset config
-    jedis = new Jedis("localhost", 6379);
-    jedis.auth("foobared");
-    jedis.configSet("timeout", timeout);
-    jedis.close();
   }
 
   @Test

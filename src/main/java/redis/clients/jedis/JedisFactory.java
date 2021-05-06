@@ -5,10 +5,12 @@ import java.net.URI;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocketFactory;
+import org.apache.commons.pool2.PooledObject;
 
 import org.apache.commons.pool2.PooledObjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.exceptions.InvalidURIException;
 
 import redis.clients.jedis.util.JedisURIHelper;
 
@@ -53,6 +55,7 @@ public class JedisFactory extends AbstractJedisFactory<Jedis> {
   }
 
   protected JedisFactory(final HostAndPort hostAndPort, final JedisClientConfig clientConfig) {
+    super(hostAndPort);
     this.clientConfig = DefaultJedisClientConfig.copyConfig(clientConfig);
     this.jedisSocketFactory = new DefaultJedisSocketFactory(hostAndPort, this.clientConfig);
   }
@@ -61,6 +64,7 @@ public class JedisFactory extends AbstractJedisFactory<Jedis> {
       final int infiniteSoTimeout, final String user, final String password, final int database,
       final String clientName, final boolean ssl, final SSLSocketFactory sslSocketFactory,
       final SSLParameters sslParameters, final HostnameVerifier hostnameVerifier) {
+    super(new HostAndPort(host, port));
     this.clientConfig = DefaultJedisClientConfig.builder().connectionTimeoutMillis(connectionTimeout)
         .socketTimeoutMillis(soTimeout).blockingSocketTimeoutMillis(infiniteSoTimeout).user(user)
         .password(password).database(database).clientName(clientName)
@@ -88,6 +92,7 @@ public class JedisFactory extends AbstractJedisFactory<Jedis> {
   protected JedisFactory(final URI uri, final int connectionTimeout, final int soTimeout,
       final int infiniteSoTimeout, final String clientName, final SSLSocketFactory sslSocketFactory,
       final SSLParameters sslParameters, final HostnameVerifier hostnameVerifier) {
+    super(getHostAndPortFromURI(uri));
     this.clientConfig = DefaultJedisClientConfig.builder().connectionTimeoutMillis(connectionTimeout)
         .socketTimeoutMillis(soTimeout).blockingSocketTimeoutMillis(infiniteSoTimeout)
         .user(JedisURIHelper.getUser(uri)).password(JedisURIHelper.getPassword(uri))
@@ -97,12 +102,21 @@ public class JedisFactory extends AbstractJedisFactory<Jedis> {
     this.jedisSocketFactory = new DefaultJedisSocketFactory(new HostAndPort(uri.getHost(), uri.getPort()), this.clientConfig);
   }
 
+  private static HostAndPort getHostAndPortFromURI(final URI uri) {
+    if (JedisURIHelper.isValid(uri)) {
+      return new HostAndPort(uri.getHost(), uri.getPort());
+    }
+    throw new InvalidURIException("Invalid URI");
+  }
+
   protected JedisFactory(final JedisClientConfig clientConfig) {
     this.clientConfig = clientConfig;
     this.jedisSocketFactory = new DefaultJedisSocketFactory();
   }
 
+  @Override
   public void setHostAndPort(final HostAndPort hostAndPort) {
+    super.setHostAndPort(hostAndPort);
     jedisSocketFactory.updateHostAndPort(hostAndPort);
   }
 
@@ -112,6 +126,15 @@ public class JedisFactory extends AbstractJedisFactory<Jedis> {
 
   @Override
   protected Jedis createObject(HostAndPort hostPort) {
-    return new Jedis(hostPort, clientConfig);
+    return new Jedis(this.jedisSocketFactory, this.clientConfig);
   }
+
+  @Override
+  public void activateObject(PooledObject<Jedis> pooledJedis) throws Exception {
+    BinaryJedis jedis = pooledJedis.getObject();
+    if (jedis.getDB() != clientConfig.getDatabase()) {
+      jedis.select(clientConfig.getDatabase());
+    }
+  }
+
 }
