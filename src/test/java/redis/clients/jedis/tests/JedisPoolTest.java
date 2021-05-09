@@ -55,7 +55,7 @@ public class JedisPoolTest {
 
   @Test
   public void checkConnectionWithDefaultPort() {
-    JedisPool pool = new JedisPool(new JedisPoolConfig(), hnp.getHost());
+    JedisPool pool = new JedisPool(new JedisPoolConfig(), hnp.getHost(), hnp.getPort());
     try (Jedis jedis = pool.getResource()) {
       jedis.auth("foobared");
       jedis.set("foo", "bar");
@@ -292,6 +292,34 @@ public class JedisPoolTest {
   }
 
   @Test
+  public void returnResourceShouldResetStateV2() {
+    GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+    config.setMaxTotal(1);
+    config.setBlockWhenExhausted(false);
+    JedisPool pool = new JedisPool(config, hnp.getHost(), hnp.getPort(), 2000, "foobared");
+
+    Jedis jedis = pool.getResource();
+    try {
+      jedis.set("hello", "jedis");
+      Transaction t = jedis.beginTransaction();
+      t.set("hello", "world");
+    } finally {
+      jedis.close();
+    }
+
+    Jedis jedis2 = pool.getResource();
+    try {
+      assertTrue(jedis == jedis2);
+      assertEquals("jedis", jedis2.get("hello"));
+    } finally {
+      jedis2.close();
+    }
+
+    pool.close();
+    assertTrue(pool.isClosed());
+  }
+
+  @Test
   public void getNumActiveIsNegativeWhenPoolIsClosed() {
     JedisPool pool = new JedisPool(new JedisPoolConfig(), hnp.getHost(), hnp.getPort(), 2000,
         "foobared", 0, "my_shiny_client_name");
@@ -301,7 +329,7 @@ public class JedisPoolTest {
     }
 
     pool.close();
-    assertTrue(pool.getNumActive() < 0);
+    assertTrue(pool.getNumActive() <= 0);
   }
 
   @Test
@@ -354,6 +382,7 @@ public class JedisPoolTest {
       Jedis j = pool.getResource();
       try {
         // make connection broken
+        j.connect();
         j.getClient().getOne();
         fail();
       } catch (Exception e) {

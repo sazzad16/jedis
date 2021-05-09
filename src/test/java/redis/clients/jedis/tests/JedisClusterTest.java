@@ -39,7 +39,6 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.ClusterReset;
 import redis.clients.jedis.DefaultJedisClientConfig;
-import redis.clients.jedis.JedisClusterInfoCache;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.exceptions.*;
@@ -722,7 +721,7 @@ public class JedisClusterTest {
         DEFAULT_REDIRECTIONS, "cluster", DEFAULT_POOL_CONFIG)) {
       Map<String, JedisPool> clusterNodes = jc.getClusterNodes();
       assertEquals(3, clusterNodes.size());
-      assertFalse(clusterNodes.containsKey(JedisClusterInfoCache.getNodeKey(localhost)));
+      assertFalse(clusterNodes.containsKey(localhost.toString()));
     }
   }
 
@@ -738,7 +737,7 @@ public class JedisClusterTest {
         DEFAULT_REDIRECTIONS, "cluster", config)) {
       Map<String, JedisPool> clusterNodes = jc.getClusterNodes();
       assertEquals(3, clusterNodes.size());
-      assertFalse(clusterNodes.containsKey(JedisClusterInfoCache.getNodeKey(invalidHost)));
+      assertFalse(clusterNodes.containsKey(invalidHost.toString()));
     }
   }
 

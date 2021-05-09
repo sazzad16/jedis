@@ -14,15 +14,15 @@ import redis.clients.jedis.exceptions.JedisMovedDataException;
 import redis.clients.jedis.exceptions.JedisRedirectionException;
 import redis.clients.jedis.util.JedisClusterCRC16;
 
-public abstract class JedisClusterCommand<T> {
+public abstract class AbstractJedisClusterCommand<T, J extends JedisBase> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(JedisClusterCommand.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AbstractJedisClusterCommand.class);
 
-  private final JedisClusterConnectionHandler connectionHandler;
+  private final AbstractJedisClusterConnectionHandler<J, ?> connectionHandler;
   private final int maxAttempts;
   private final Duration maxTotalRetriesDuration;
 
-  public JedisClusterCommand(JedisClusterConnectionHandler connectionHandler, int maxAttempts) {
+  public AbstractJedisClusterCommand(AbstractJedisClusterConnectionHandler<J, ?> connectionHandler, int maxAttempts) {
     this(connectionHandler, maxAttempts, Duration.ofMillis((long) BinaryJedisCluster.DEFAULT_TIMEOUT * maxAttempts));
   }
 
@@ -31,14 +31,14 @@ public abstract class JedisClusterCommand<T> {
    * @param maxAttempts
    * @param maxTotalRetriesDuration No more attempts after we have been trying for this long.
    */
-  public JedisClusterCommand(JedisClusterConnectionHandler connectionHandler, int maxAttempts,
+  public AbstractJedisClusterCommand(AbstractJedisClusterConnectionHandler<J, ?> connectionHandler, int maxAttempts,
       Duration maxTotalRetriesDuration) {
     this.connectionHandler = connectionHandler;
     this.maxAttempts = maxAttempts;
     this.maxTotalRetriesDuration = maxTotalRetriesDuration;
   }
 
-  public abstract T execute(Jedis connection);
+  public abstract T execute(J connection);
 
   public T run(String key) {
     return runWithRetries(JedisClusterCRC16.getSlot(key));
@@ -89,7 +89,7 @@ public abstract class JedisClusterCommand<T> {
   }
 
   public T runWithAnyNode() {
-    Jedis connection = null;
+    J connection = null;
     try {
       connection = connectionHandler.getConnection();
       return execute(connection);
@@ -105,7 +105,7 @@ public abstract class JedisClusterCommand<T> {
     int consecutiveConnectionFailures = 0;
     Exception lastException = null;
     for (int attemptsLeft = this.maxAttempts; attemptsLeft > 0; attemptsLeft--) {
-      Jedis connection = null;
+      J connection = null;
       try {
         if (redirect != null) {
           connection = connectionHandler.getConnectionFromNode(redirect.getTargetNode());
@@ -213,7 +213,7 @@ public abstract class JedisClusterCommand<T> {
     }
   }
 
-  private void releaseConnection(Jedis connection) {
+  private void releaseConnection(J connection) {
     if (connection != null) {
       connection.close();
     }

@@ -17,15 +17,12 @@ import redis.clients.jedis.args.*;
 import redis.clients.jedis.commands.*;
 import redis.clients.jedis.params.*;
 import redis.clients.jedis.resps.*;
-import redis.clients.jedis.util.Pool;
 import redis.clients.jedis.util.SafeEncoder;
 import redis.clients.jedis.util.Slowlog;
 
-public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommands,
+public class Jedis extends BinaryJedis<Jedis> implements JedisCommands, MultiKeyCommands,
     AdvancedJedisCommands, ScriptingCommands, BasicCommands, ClusterCommands, SentinelCommands,
     ModuleCommands {
-
-  private Pool<Jedis> dataSource = null;
 
   public Jedis() {
     super();
@@ -162,6 +159,12 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
 
   public Jedis(final JedisSocketFactory jedisSocketFactory, final JedisClientConfig clientConfig) {
     super(jedisSocketFactory, clientConfig);
+  }
+
+  public Pipeline startPipeline() {
+    checkIsInMultiOrPipeline();
+    pipeline = new Pipeline(this);
+    return pipeline;
   }
 
   /**
@@ -3645,13 +3648,6 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
   }
 
   @Override
-  public String clientSetname(final String name) {
-    checkIsInMultiOrPipeline();
-    client.clientSetname(name);
-    return client.getStatusCodeReply();
-  }
-
-  @Override
   public Long clientId() {
     checkIsInMultiOrPipeline();
     client.clientId();
@@ -3915,12 +3911,6 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     return client.getObjectMultiBulkReply();
   }
 
-  public String asking() {
-    checkIsInMultiOrPipeline();
-    client.asking();
-    return client.getStatusCodeReply();
-  }
-
   public List<String> pubsubChannels(final String pattern) {
     checkIsInMultiOrPipeline();
     client.pubsubChannels(pattern);
@@ -3937,25 +3927,6 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     checkIsInMultiOrPipeline();
     client.pubsubNumSub(channels);
     return BuilderFactory.PUBSUB_NUMSUB_MAP.build(client.getBinaryMultiBulkReply());
-  }
-
-  @Override
-  public void close() {
-    if (dataSource != null) {
-      Pool<Jedis> pool = this.dataSource;
-      this.dataSource = null;
-      if (isBroken()) {
-        pool.returnBrokenResource(this);
-      } else {
-        pool.returnResource(this);
-      }
-    } else {
-      super.close();
-    }
-  }
-
-  protected void setDataSource(Pool<Jedis> jedisPool) {
-    this.dataSource = jedisPool;
   }
 
   @Override
@@ -4562,22 +4533,5 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
 
     return BuilderFactory.STREAM_CONSUMERS_INFO_LIST.build(client.getObjectMultiBulkReply());
 
-  }
-
-  public Object sendCommand(ProtocolCommand cmd, String... args) {
-    checkIsInMultiOrPipeline();
-    client.sendCommand(cmd, args);
-    return client.getOne();
-  }
-
-  public Object sendBlockingCommand(ProtocolCommand cmd, String... args) {
-    checkIsInMultiOrPipeline();
-    client.sendCommand(cmd, args);
-    client.setTimeoutInfinite();
-    try {
-      return client.getOne();
-    } finally {
-      client.rollbackTimeout();
-    }
   }
 }

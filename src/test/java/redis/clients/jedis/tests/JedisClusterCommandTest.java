@@ -20,11 +20,10 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import redis.clients.jedis.AbstractJedisClusterCommand;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisClusterCommand;
 import redis.clients.jedis.JedisClusterConnectionHandler;
-import redis.clients.jedis.JedisSlotBasedConnectionHandler;
 import redis.clients.jedis.exceptions.JedisAskDataException;
 import redis.clients.jedis.exceptions.JedisClusterMaxAttemptsException;
 import redis.clients.jedis.exceptions.JedisClusterOperationException;
@@ -39,7 +38,7 @@ public class JedisClusterCommandTest {
   @Test
   public void runSuccessfulExecute() {
     JedisClusterConnectionHandler connectionHandler = mock(JedisClusterConnectionHandler.class);
-    JedisClusterCommand<String> testMe = new JedisClusterCommand<String>(connectionHandler, 10,
+    AbstractJedisClusterCommand<String, Jedis> testMe = new AbstractJedisClusterCommand<String, Jedis>(connectionHandler, 10,
         Duration.ZERO) {
       @Override
       public String execute(Jedis connection) {
@@ -59,7 +58,7 @@ public class JedisClusterCommandTest {
   public void runFailOnFirstExecSuccessOnSecondExec() {
     JedisClusterConnectionHandler connectionHandler = mock(JedisClusterConnectionHandler.class);
 
-    JedisClusterCommand<String> testMe = new JedisClusterCommand<String>(connectionHandler, 10,
+    AbstractJedisClusterCommand<String, Jedis> testMe = new AbstractJedisClusterCommand<String, Jedis>(connectionHandler, 10,
         ONE_SECOND) {
       boolean isFirstCall = true;
 
@@ -85,10 +84,10 @@ public class JedisClusterCommandTest {
 
   @Test
   public void runAlwaysFailing() {
-    JedisSlotBasedConnectionHandler connectionHandler = mock(JedisSlotBasedConnectionHandler.class);
+    JedisClusterConnectionHandler connectionHandler = mock(JedisClusterConnectionHandler.class);
 
     final LongConsumer sleep = mock(LongConsumer.class);
-    JedisClusterCommand<String> testMe = new JedisClusterCommand<String>(connectionHandler, 3,
+    AbstractJedisClusterCommand<String, Jedis> testMe = new AbstractJedisClusterCommand<String, Jedis>(connectionHandler, 3,
         ONE_SECOND) {
       @Override
       public String execute(Jedis connection) {
@@ -117,10 +116,10 @@ public class JedisClusterCommandTest {
 
   @Test
   public void runMovedSuccess() {
-    JedisSlotBasedConnectionHandler connectionHandler = mock(JedisSlotBasedConnectionHandler.class);
+    JedisClusterConnectionHandler connectionHandler = mock(JedisClusterConnectionHandler.class);
 
     final HostAndPort movedTarget = new HostAndPort(null, 0);
-    JedisClusterCommand<String> testMe = new JedisClusterCommand<String>(connectionHandler, 10,
+    AbstractJedisClusterCommand<String, Jedis> testMe = new AbstractJedisClusterCommand<String, Jedis>(connectionHandler, 10,
         ONE_SECOND) {
       boolean isFirstCall = true;
 
@@ -154,12 +153,12 @@ public class JedisClusterCommandTest {
 
   @Test
   public void runAskSuccess() {
-    JedisSlotBasedConnectionHandler connectionHandler = mock(JedisSlotBasedConnectionHandler.class);
+    JedisClusterConnectionHandler connectionHandler = mock(JedisClusterConnectionHandler.class);
     Jedis connection = mock(Jedis.class);
     final HostAndPort askTarget = new HostAndPort(null, 0);
     when(connectionHandler.getConnectionFromNode(askTarget)).thenReturn(connection);
 
-    JedisClusterCommand<String> testMe = new JedisClusterCommand<String>(connectionHandler, 10,
+    AbstractJedisClusterCommand<String, Jedis> testMe = new AbstractJedisClusterCommand<String, Jedis>(connectionHandler, 10,
         ONE_SECOND) {
       boolean isFirstCall = true;
 
@@ -199,7 +198,7 @@ public class JedisClusterCommandTest {
     // All subsequent attempts are JedisConnectionExceptions, because all nodes are now down.
     // In response to the JedisConnectionExceptions, run() retries random nodes until maxAttempts is
     // reached.
-    JedisSlotBasedConnectionHandler connectionHandler = mock(JedisSlotBasedConnectionHandler.class);
+    JedisClusterConnectionHandler connectionHandler = mock(JedisClusterConnectionHandler.class);
 
     final Jedis redirecter = mock(Jedis.class);
     when(connectionHandler.getConnectionFromSlot(anyInt())).thenReturn(redirecter);
@@ -213,7 +212,7 @@ public class JedisClusterCommandTest {
 
     final LongConsumer sleep = mock(LongConsumer.class);
     final HostAndPort movedTarget = new HostAndPort(null, 0);
-    JedisClusterCommand<String> testMe = new JedisClusterCommand<String>(connectionHandler, 5,
+    AbstractJedisClusterCommand<String, Jedis> testMe = new AbstractJedisClusterCommand<String, Jedis>(connectionHandler, 5,
         ONE_SECOND) {
       @Override
       public String execute(Jedis connection) {
@@ -270,7 +269,7 @@ public class JedisClusterCommandTest {
     final Jedis replica = mock(Jedis.class);
     when(replica.toString()).thenReturn("replica");
 
-    JedisSlotBasedConnectionHandler connectionHandler = mock(JedisSlotBasedConnectionHandler.class);
+    JedisClusterConnectionHandler connectionHandler = mock(JedisClusterConnectionHandler.class);
 
     when(connectionHandler.getConnectionFromSlot(anyInt())).thenReturn(master);
 
@@ -280,7 +279,7 @@ public class JedisClusterCommandTest {
     }).when(connectionHandler).renewSlotCache();
 
     final AtomicLong totalSleepMs = new AtomicLong();
-    JedisClusterCommand<String> testMe = new JedisClusterCommand<String>(connectionHandler, 10,
+    AbstractJedisClusterCommand<String, Jedis> testMe = new AbstractJedisClusterCommand<String, Jedis>(connectionHandler, 10,
         ONE_SECOND) {
 
       @Override
@@ -314,11 +313,11 @@ public class JedisClusterCommandTest {
 
   @Test(expected = JedisNoReachableClusterNodeException.class)
   public void runRethrowsJedisNoReachableClusterNodeException() {
-    JedisSlotBasedConnectionHandler connectionHandler = mock(JedisSlotBasedConnectionHandler.class);
+    JedisClusterConnectionHandler connectionHandler = mock(JedisClusterConnectionHandler.class);
     when(connectionHandler.getConnectionFromSlot(anyInt())).thenThrow(
       JedisNoReachableClusterNodeException.class);
 
-    JedisClusterCommand<String> testMe = new JedisClusterCommand<String>(connectionHandler, 10,
+    AbstractJedisClusterCommand<String, Jedis> testMe = new AbstractJedisClusterCommand<String, Jedis>(connectionHandler, 10,
         Duration.ZERO) {
       @Override
       public String execute(Jedis connection) {
@@ -336,10 +335,10 @@ public class JedisClusterCommandTest {
 
   @Test
   public void runStopsRetryingAfterTimeout() {
-    JedisSlotBasedConnectionHandler connectionHandler = mock(JedisSlotBasedConnectionHandler.class);
+    JedisClusterConnectionHandler connectionHandler = mock(JedisClusterConnectionHandler.class);
 
     final LongConsumer sleep = mock(LongConsumer.class);
-    JedisClusterCommand<String> testMe = new JedisClusterCommand<String>(connectionHandler, 3,
+    AbstractJedisClusterCommand<String, Jedis> testMe = new AbstractJedisClusterCommand<String, Jedis>(connectionHandler, 3,
         Duration.ZERO) {
       @Override
       public String execute(Jedis connection) {

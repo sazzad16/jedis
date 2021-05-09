@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import org.apache.commons.pool2.PooledObjectFactory;
 
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
@@ -16,11 +17,12 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.exceptions.JedisException;
 import redis.clients.jedis.util.Pool;
 
-public class JedisSentinelPool extends Pool<Jedis> {
+public class JedisSentinelPool extends JedisPoolBase<Jedis> {
+  protected Logger log = LoggerFactory.getLogger(getClass().getName());
 
   private static final Logger LOG = LoggerFactory.getLogger(JedisSentinelPool.class);
 
-  private final JedisFactory factory;
+  private final AbstractJedisFactory<Jedis> factory;
 
   private final JedisClientConfig sentinelClientConfig;
 
@@ -280,7 +282,7 @@ public class JedisSentinelPool extends Pool<Jedis> {
   public Jedis getResource() {
     while (true) {
       Jedis jedis = super.getResource();
-      jedis.setDataSource(this);
+      // jedis.setDataSource(this); // done in JedisPoolBase
 
       // get a reference because it can change concurrently
       final HostAndPort master = currentHostMaster;
@@ -317,9 +319,6 @@ public class JedisSentinelPool extends Pool<Jedis> {
     protected long subscribeRetryWaitTimeMillis = 5000;
     protected volatile Jedis j;
     protected AtomicBoolean running = new AtomicBoolean(false);
-
-    protected MasterListener() {
-    }
 
     public MasterListener(String masterName, String host, int port) {
       super(String.format("MasterListener-%s-[%s:%d]", masterName, host, port));

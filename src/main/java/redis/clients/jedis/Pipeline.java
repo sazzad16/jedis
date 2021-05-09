@@ -6,11 +6,27 @@ import java.util.List;
 
 import redis.clients.jedis.exceptions.JedisDataException;
 
-public class Pipeline extends MultiKeyPipelineBase implements Closeable {
+public class Pipeline<J extends JedisBase> extends MultiKeyPipelineBase implements Closeable {
+
+  private final J resource;
+
+  /**
+   * @deprecated This constructor will be removed in future.
+   */
+  @Deprecated
+  public Pipeline() {
+    this.resource = null;
+  }
+
+  public Pipeline(J resource) {
+    this.resource = resource;
+    this.client = resource.getClient();
+  }
 
   private MultiResponseBuilder currentMulti;
 
   private class MultiResponseBuilder extends Builder<List<Object>> {
+
     private List<Response<?>> responses = new ArrayList<>();
 
     @Override
@@ -62,15 +78,34 @@ public class Pipeline extends MultiKeyPipelineBase implements Closeable {
     }
   }
 
+  /**
+   * @deprecated This will be removed in future.
+   * @param client
+   */
+  @Deprecated
   public void setClient(Client client) {
-    this.client = client;
+    if (this.resource == null) {
+      this.client = client;
+    }
   }
 
+  /**
+   * @deprecated This will be final in future.
+   * @param key
+   * @return
+   */
+  @Deprecated
   @Override
   protected Client getClient(byte[] key) {
     return client;
   }
 
+  /**
+   * @deprecated This will be final in future.
+   * @param key
+   * @return
+   */
+  @Deprecated
   @Override
   protected Client getClient(String key) {
     return client;
@@ -121,12 +156,13 @@ public class Pipeline extends MultiKeyPipelineBase implements Closeable {
       }
       return formatted;
     } else {
-      return java.util.Collections.<Object> emptyList();
+      return java.util.Collections.<Object>emptyList();
     }
   }
 
   public Response<String> discard() {
     if (currentMulti == null) throw new IllegalStateException("DISCARD without MULTI");
+
     client.discard();
     currentMulti = null;
     return getResponse(BuilderFactory.STRING);
@@ -154,6 +190,9 @@ public class Pipeline extends MultiKeyPipelineBase implements Closeable {
   @Override
   public void close() {
     clear();
+    if (this.resource != null) {
+      this.resource.unsetDataSource();
+    }
   }
 
   public Response<String> watch(String... keys) {
