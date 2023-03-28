@@ -8,9 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
 import org.json.JSONArray;
 import org.slf4j.Logger;
@@ -42,14 +43,7 @@ import redis.clients.jedis.util.KeyValue;
 public abstract class MultiNodePipelineBase implements PipelineCommands, PipelineBinaryCommands,
     RedisModulePipelineCommands, Closeable {
 
-  private final Logger log = LoggerFactory.getLogger(getClass());
-
-  /**
-   * The number of processes for {@code sync()}. If you have enough cores for client (and you have
-   * more than 3 cluster nodes), you may increase this number of workers.
-   * Suggestion:&nbsp;&le;&nbsp;cluster&nbsp;nodes.
-   */
-  public static volatile int MULTI_NODE_PIPELINE_SYNC_WORKERS = 3;
+  private static final Logger log = LoggerFactory.getLogger(MultiNodePipelineBase.class);
 
   private final Map<HostAndPort, Queue<Response<?>>> pipelinedResponses;
   private final Map<HostAndPort, Connection> connections;
@@ -58,12 +52,37 @@ public abstract class MultiNodePipelineBase implements PipelineCommands, Pipelin
   private final CommandObjects commandObjects;
   private GraphCommandObjects graphCommandObjects;
 
-  private final ExecutorService executorService = Executors.newFixedThreadPool(MULTI_NODE_PIPELINE_SYNC_WORKERS);
+  /**
+   * The following are the default parameters for the multi node pipeline executor
+   * Since Redis query is usually a slower IO operation (requires more threads),
+   * so we set DEFAULT_CORE_POOL_SIZE to be the same as the core
+   */
+  private static final long DEFAULT_KEEPALIVE_TIME_MS = 60000L;
+  private static final int DEFAULT_BLOCKING_QUEUE_SIZE = Protocol.CLUSTER_HASHSLOTS;
+  private static final int DEFAULT_CORE_POOL_SIZE = Runtime.getRuntime().availableProcessors();
+  private static final int DEFAULT_MAXIMUM_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 2;
+  private static ExecutorService executorService = JedisThreadPoolBuilder.pool()
+      .setCoreSize(DEFAULT_CORE_POOL_SIZE)
+      .setMaxSize(DEFAULT_MAXIMUM_POOL_SIZE)
+      .setKeepAliveMillSecs(DEFAULT_KEEPALIVE_TIME_MS)
+      .setThreadNamePrefix("jedis-multi-node-pipeline")
+      .setWorkQueue(new ArrayBlockingQueue<>(DEFAULT_BLOCKING_QUEUE_SIZE)).build();
 
   public MultiNodePipelineBase(CommandObjects commandObjects) {
     pipelinedResponses = new LinkedHashMap<>();
     connections = new LinkedHashMap<>();
     this.commandObjects = commandObjects;
+  }
+
+  /**
+   * Provide an interface for users to set executors themselves.
+   * @param executor the executor
+   */
+  public static void setExecutorService(ExecutorService executor) {
+    if (executorService != executor && executorService != null) {
+      executorService.shutdown();
+    }
+    executorService = executor;
   }
 
   /**
@@ -129,22 +148,28 @@ public abstract class MultiNodePipelineBase implements PipelineCommands, Pipelin
       HostAndPort nodeKey = entry.getKey();
       Queue<Response<?>> queue = entry.getValue();
       Connection connection = connections.get(nodeKey);
-      executorService.submit(() -> {
-        try {
-          List<Object> unformatted = connection.getMany(queue.size());
-          for (Object o : unformatted) {
-            queue.poll().set(o);
+      try {
+        executorService.submit(() -> {
+          try {
+            List<Object> unformatted = connection.getMany(queue.size());
+            for (Object o : unformatted) {
+              queue.poll().set(o);
+            }
+          } catch (JedisConnectionException jce) {
+            log.error("Error with connection to " + nodeKey, jce);
+            // cleanup the connection
+            pipelinedResponsesIterator.remove();
+            connections.remove(nodeKey);
+            IOUtils.closeQuietly(connection);
+          } finally {
+            countDownLatch.countDown();
           }
-        } catch (JedisConnectionException jce) {
-          log.error("Error with connection to " + nodeKey, jce);
-          // cleanup the connection
-          pipelinedResponsesIterator.remove();
-          connections.remove(nodeKey);
-          IOUtils.closeQuietly(connection);
-        } finally {
-          countDownLatch.countDown();
-        }
-      });
+        });
+      } catch (RejectedExecutionException e) {
+        log.error("Get a reject exception when submitting, it is recommended that you use the "
+            + "MultiNodePipelineBase#setExecutorService method to customize the executor", e);
+        throw e;
+      }
     }
 
     try {
