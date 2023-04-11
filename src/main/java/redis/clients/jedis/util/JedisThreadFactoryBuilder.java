@@ -1,4 +1,4 @@
-package redis.clients.jedis;
+package redis.clients.jedis.util;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.Executors;

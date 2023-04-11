@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 
 import org.json.JSONArray;
@@ -38,12 +38,15 @@ import redis.clients.jedis.search.aggr.AggregationResult;
 import redis.clients.jedis.search.schemafields.SchemaField;
 import redis.clients.jedis.timeseries.*;
 import redis.clients.jedis.util.IOUtils;
+import redis.clients.jedis.util.JedisThreadPool;
 import redis.clients.jedis.util.KeyValue;
 
 public abstract class MultiNodePipelineBase implements PipelineCommands, PipelineBinaryCommands,
     RedisModulePipelineCommands, Closeable {
 
   private static final Logger log = LoggerFactory.getLogger(MultiNodePipelineBase.class);
+
+  public static volatile int MULTI_NODE_PIPELINE_SYNC_WORKERS = 3;
 
   private final Map<HostAndPort, Queue<Response<?>>> pipelinedResponses;
   private final Map<HostAndPort, Connection> connections;
@@ -52,37 +55,19 @@ public abstract class MultiNodePipelineBase implements PipelineCommands, Pipelin
   private final CommandObjects commandObjects;
   private GraphCommandObjects graphCommandObjects;
 
-  /**
-   * The following are the default parameters for the multi node pipeline executor
-   * Since Redis query is usually a slower IO operation (requires more threads),
-   * so we set DEFAULT_CORE_POOL_SIZE to be the same as the core
-   */
-  private static final long DEFAULT_KEEPALIVE_TIME_MS = 60000L;
-  private static final int DEFAULT_BLOCKING_QUEUE_SIZE = Protocol.CLUSTER_HASHSLOTS;
-  private static final int DEFAULT_CORE_POOL_SIZE = Runtime.getRuntime().availableProcessors();
-  private static final int DEFAULT_MAXIMUM_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 2;
-  private static ExecutorService executorService = JedisThreadPoolBuilder.pool()
-      .setCoreSize(DEFAULT_CORE_POOL_SIZE)
-      .setMaxSize(DEFAULT_MAXIMUM_POOL_SIZE)
-      .setKeepAliveMillSecs(DEFAULT_KEEPALIVE_TIME_MS)
-      .setThreadNamePrefix("jedis-multi-node-pipeline")
-      .setWorkQueue(new ArrayBlockingQueue<>(DEFAULT_BLOCKING_QUEUE_SIZE)).build();
+  private final ExecutorService executorService = getThreadPool();
+
+  private ExecutorService getThreadPool() {
+    ExecutorService threadPool = JedisThreadPool.getThreadPool();
+    if (threadPool != null) return threadPool;
+
+    return Executors.newFixedThreadPool(MULTI_NODE_PIPELINE_SYNC_WORKERS);
+  }
 
   public MultiNodePipelineBase(CommandObjects commandObjects) {
     pipelinedResponses = new LinkedHashMap<>();
     connections = new LinkedHashMap<>();
     this.commandObjects = commandObjects;
-  }
-
-  /**
-   * Provide an interface for users to set executors themselves.
-   * @param executor the executor
-   */
-  public static void setExecutorService(ExecutorService executor) {
-    if (executorService != executor && executorService != null) {
-      executorService.shutdown();
-    }
-    executorService = executor;
   }
 
   /**
@@ -166,8 +151,8 @@ public abstract class MultiNodePipelineBase implements PipelineCommands, Pipelin
           }
         });
       } catch (RejectedExecutionException e) {
-        log.error("Get a reject exception when submitting, it is recommended that you use the "
-            + "MultiNodePipelineBase#setExecutorService method to customize the executor", e);
+        log.error("Get a reject exception when submitting; it is recommended to customize "
+            + "the thread pool (ExecutorService).", e);
         throw e;
       }
     }
