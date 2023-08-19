@@ -40,7 +40,15 @@
   - `tsMRevRange(long fromTimestamp, long toTimestamp, String... filters)`
   - `tsMRevRange(TSMRangeParams multiRangeParams)`
 
+- `jsonNumIncrBy(String key, Path2 path, double value)` method now returns `Object` instead of `JSONArray`.
+  - Previously when it was returning JSONArray, returned would still be JSONArray. So simple type casting should be enough to handle this change.
+  - The returning object will be `List<Double>` when running under RESP3 protocol.
+
 - `getAgeSeconds()` in `AccessControlLogEntry` now returns `Double` instead of `String`.
+
+- Both `ftConfigGet(String option)` and `ftConfigGet(String indexName, String option)` methods now return `Map<String, Object>` instead of `Map<String, String>`.
+
+- `ftList()` method now returns `Set<String>` instead of `List<String>`.
 
 - `graphSlowlog(String graphName)` now returns `List<List<Object>>` (instead of `List<List<String>>`).
 
@@ -59,6 +67,11 @@
   - `BINARY_MAP_FROM_PAIRS`
   - `STRING_ORDERED_SET`
 
+- Following methods supporting JSON.RESP command have been removed:
+  - `jsonResp(String key)`
+  - `jsonResp(String key, Path path)`
+  - `jsonResp(String key, Path2 path)`
+
 - `RedisJsonCommands` and `RedisJsonPipelineCommands` interfaces have been moved into `redis.clients.jedis.json.commands` package.
 
 - `Queable` class is removed.
@@ -73,6 +86,10 @@
 - `XPendingParams` now throws `IllegalArgumentException` (instead of `IllegalStateException`) in case of unfulfilling optional arguments.
 
 - `getParams()` method is removed from `SortingParams` class.
+
+- Both `SEARCH_AGGREGATION_RESULT` and `SEARCH_AGGREGATION_RESULT_WITH_CURSOR` implementations from `SearchBuilderFactory` class have been moved to `AggregationResult` class.
+
+- All `AggregationResult` constructors have been made `private`.
 
 - `addCommandEncodedArguments` and `addCommandBinaryArguments` methods have been removed from `FieldName` class.
 
