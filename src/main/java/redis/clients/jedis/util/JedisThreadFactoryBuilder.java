@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * JedisThreadFactoryBuilder is a class that builds a ThreadFactory for Jedis.
  */
 public class JedisThreadFactoryBuilder {
+
     private String namePrefix = null;
     private boolean daemon = false;
     private int priority = Thread.NORM_PRIORITY;

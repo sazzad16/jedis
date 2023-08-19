@@ -23,7 +23,7 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.graph.GraphCommandObjects;
 import redis.clients.jedis.providers.ConnectionProvider;
 import redis.clients.jedis.util.IOUtils;
-import redis.clients.jedis.util.JedisThreadPool;
+import redis.clients.jedis.util.MultiNodePipelineThreadPool;
 
 public abstract class MultiNodePipelineBase extends PipelineBase
     implements PipelineCommands, PipelineBinaryCommands, RedisModulePipelineCommands, Closeable {
@@ -94,7 +94,7 @@ public abstract class MultiNodePipelineBase extends PipelineBase
   }
 
   private ExecutorService getThreadPool() {
-    ExecutorService threadPool = JedisThreadPool.getThreadPool();
+    ExecutorService threadPool = MultiNodePipelineThreadPool.getThreadPool();
     if (threadPool != null) return threadPool;
 
     return Executors.newFixedThreadPool(MULTI_NODE_PIPELINE_SYNC_WORKERS);

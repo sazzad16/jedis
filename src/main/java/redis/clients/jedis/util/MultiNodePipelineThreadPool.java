@@ -17,9 +17,9 @@ import redis.clients.jedis.Protocol;
 /**
  * This class is used to build a thread pool for Jedis.
  */
-public class JedisThreadPool {
+public class MultiNodePipelineThreadPool {
 
-    private static final Logger log = LoggerFactory.getLogger(JedisThreadPool.class);
+    private static final Logger log = LoggerFactory.getLogger(MultiNodePipelineThreadPool.class);
 
     private static final RejectedExecutionHandler defaultRejectHandler = new AbortPolicy();
 
@@ -27,16 +27,16 @@ public class JedisThreadPool {
         return new PoolBuilder();
     }
 
-  /**
-   * The following are the default parameters for the multi node pipeline executor
-   * Since Redis query is usually a slower IO operation (requires more threads),
-   * so we set DEFAULT_CORE_POOL_SIZE to be the same as the core
-   */
-  private static final long DEFAULT_KEEPALIVE_TIME_MS = 60000L;
-  private static final int DEFAULT_BLOCKING_QUEUE_SIZE = Protocol.CLUSTER_HASHSLOTS;
-  private static final int DEFAULT_CORE_POOL_SIZE = Runtime.getRuntime().availableProcessors();
-  private static final int DEFAULT_MAXIMUM_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 2;
-  private static ExecutorService executorService = null;
+    /**
+     * The following are the default parameters for the multi node pipeline executor
+     * Since Redis query is usually a slower IO operation (requires more threads),
+     * so we set DEFAULT_CORE_POOL_SIZE to be the same as the core
+     */
+    private static final long DEFAULT_KEEPALIVE_TIME_MS = 60000L;
+    private static final int DEFAULT_BLOCKING_QUEUE_SIZE = Protocol.CLUSTER_HASHSLOTS;
+    private static final int DEFAULT_CORE_POOL_SIZE = Runtime.getRuntime().availableProcessors();
+    private static final int DEFAULT_MAXIMUM_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 2;
+    private static ExecutorService executorService = null;
 
   public static ExecutorService getThreadPool() {
     return executorService;
@@ -58,17 +58,17 @@ public class JedisThreadPool {
    * @return thread pool
    */
   public static ExecutorService createDefaultThreadPool() {
-    return JedisThreadPool.poolBuilder()
+    return MultiNodePipelineThreadPool.poolBuilder()
       .setCoreSize(DEFAULT_CORE_POOL_SIZE)
       .setMaxSize(DEFAULT_MAXIMUM_POOL_SIZE)
       .setKeepAliveMillSecs(DEFAULT_KEEPALIVE_TIME_MS)
-      .setThreadNamePrefix("jedis-multi-node-pipeline")
+      .setThreadNamePrefix("multi-node-pipeline")
       .setWorkQueue(new ArrayBlockingQueue<>(DEFAULT_BLOCKING_QUEUE_SIZE)).build();
   }
 
   /**
-   * This is a shortcut for {@link JedisThreadPool#createDefaultThreadPool()} and
-   * {@link JedisThreadPool#setThreadPool(java.util.concurrent.ExecutorService)}.
+   * This is a shortcut for {@link MultiNodePipelineThreadPool#createDefaultThreadPool()} and
+   * {@link MultiNodePipelineThreadPool#setThreadPool(java.util.concurrent.ExecutorService)}.
    */
   public static void createAndUseDefaultThreadPool() {
     setThreadPool(createDefaultThreadPool());
