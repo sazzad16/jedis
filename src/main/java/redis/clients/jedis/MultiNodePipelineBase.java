@@ -23,6 +23,7 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.graph.GraphCommandObjects;
 import redis.clients.jedis.providers.ConnectionProvider;
 import redis.clients.jedis.util.IOUtils;
+import redis.clients.jedis.util.KeyValue;
 import redis.clients.jedis.util.MultiNodePipelineThreadPool;
 
 public abstract class MultiNodePipelineBase extends PipelineBase
@@ -93,11 +94,14 @@ public abstract class MultiNodePipelineBase extends PipelineBase
     }
   }
 
-  private ExecutorService getThreadPool() {
+  /**
+   * Get thread pool and whether to close it or not.
+   */
+  private KeyValue<ExecutorService, Boolean> getThreadPool() {
     ExecutorService threadPool = MultiNodePipelineThreadPool.getThreadPool();
-    if (threadPool != null) return threadPool;
+    if (threadPool != null) return KeyValue.of(threadPool, false);
 
-    return Executors.newFixedThreadPool(MULTI_NODE_PIPELINE_SYNC_WORKERS);
+    return KeyValue.of(Executors.newFixedThreadPool(MULTI_NODE_PIPELINE_SYNC_WORKERS), true);
   }
 
   @Override
@@ -107,7 +111,7 @@ public abstract class MultiNodePipelineBase extends PipelineBase
     }
     syncing = true;
 
-    ExecutorService executorService = getThreadPool();
+    KeyValue<ExecutorService, Boolean> executorService = getThreadPool();
 
     CountDownLatch countDownLatch = new CountDownLatch(pipelinedResponses.size());
     Iterator<Map.Entry<HostAndPort, Queue<Response<?>>>> pipelinedResponsesIterator
@@ -118,7 +122,7 @@ public abstract class MultiNodePipelineBase extends PipelineBase
       Queue<Response<?>> queue = entry.getValue();
       Connection connection = connections.get(nodeKey);
       try {
-        executorService.submit(() -> {
+        executorService.getKey().submit(() -> {
           try {
             List<Object> unformatted = connection.getMany(queue.size());
             for (Object o : unformatted) {
@@ -146,7 +150,9 @@ public abstract class MultiNodePipelineBase extends PipelineBase
       log.error("Thread is interrupted during sync.", e);
     }
 
-    executorService.shutdownNow();
+    if (executorService.getValue()) {
+      executorService.getKey().shutdownNow();
+    }
 
     syncing = false;
   }
